@@ -1,0 +1,177 @@
+#!/usr/bin/Rscript
+
+#load the needed libraries
+library(tidyverse)
+#tidyverse_1.3.0 
+library(sessioninfo)
+#sessioninfo_1.1.1
+library(methylKit)
+#methylKit_1.16.1 
+library(edmr)
+#edmr_0.6.4.1
+
+setwd("/home/projects/ku-cbd/data/HoloFish/morten_fish/Epigenome/Novogene_CrappyFish_20samples_24Sep20_Analyses/5_bismark")
+
+file.list<-list(
+"D1.pair1.truncated.gz_bismark_bt2_pe.multiple.deduplicated.bismark.cov.gz",
+"D2.pair1.truncated.gz_bismark_bt2_pe.multiple.deduplicated.bismark.cov.gz",
+"D3.pair1.truncated.gz_bismark_bt2_pe.multiple.deduplicated.bismark.cov.gz",
+"D4.pair1.truncated.gz_bismark_bt2_pe.multiple.deduplicated.bismark.cov.gz",
+"D5.pair1.truncated.gz_bismark_bt2_pe.multiple.deduplicated.bismark.cov.gz",
+"D6.pair1.truncated.gz_bismark_bt2_pe.multiple.deduplicated.bismark.cov.gz",
+"D8.pair1.truncated.gz_bismark_bt2_pe.multiple.deduplicated.bismark.cov.gz",
+"D9.pair1.truncated.gz_bismark_bt2_pe.multiple.deduplicated.bismark.cov.gz",
+"D10.pair1.truncated.gz_bismark_bt2_pe.multiple.deduplicated.bismark.cov.gz",
+"D11.pair1.truncated.gz_bismark_bt2_pe.multiple.deduplicated.bismark.cov.gz",
+"D12.pair1.truncated.gz_bismark_bt2_pe.multiple.deduplicated.bismark.cov.gz",
+"D13.pair1.truncated.gz_bismark_bt2_pe.multiple.deduplicated.bismark.cov.gz",
+"D14.pair1.truncated.gz_bismark_bt2_pe.multiple.deduplicated.bismark.cov.gz",
+"D15.pair1.truncated.gz_bismark_bt2_pe.multiple.deduplicated.bismark.cov.gz",
+"D16.pair1.truncated.gz_bismark_bt2_pe.multiple.deduplicated.bismark.cov.gz",
+"D17.pair1.truncated.gz_bismark_bt2_pe.multiple.deduplicated.bismark.cov.gz",
+"D18.pair1.truncated.gz_bismark_bt2_pe.multiple.deduplicated.bismark.cov.gz",
+"D19.pair1.truncated.gz_bismark_bt2_pe.multiple.deduplicated.bismark.cov.gz",
+"D20.pair1.truncated.gz_bismark_bt2_pe.multiple.deduplicated.bismark.cov.gz") 
+
+my_obj<-methRead(file.list, sample.id = list("D1","D2","D3","D4","D5","D6","D8","D9","D10", "D11","D12","D13","D14","D15","D16","D17","D18","D19","D20"), assembly = "ICSASG_v2", pipeline = "bismarkCoverage", treatment= c(1,1,1,0,1,0,1,1,0,1,0,1,0,0,1,0,0,1,0), context= "CpG", mincov=1)
+#treatment is meta data from Davides records:0 is healthy/Mycoplasma, 1 correspond to sick/Avivibro. 
+#context =CpG, means we only look at CpG sites 
+
+filtered.my_obj_5X=filterByCoverage(my_obj,lo.count=5,lo.perc=NULL, hi.count=NULL,hi.perc=99.9)
+
+meth.filtered_5X<-unite(filtered.my_obj_5X, destrand=F)
+
+print(dim(meth.filtered_5X))
+
+#Figure 1.1: PCA
+
+sample.id <- c("D1","D2","D3","D4","D5","D6","D8","D9","D10", "D11","D12","D13","D14","D15","D16","D17","D18","D19","D20")
+treatment_n <- c(1,1,1,0,1,0,1,1,0,1,0,1,0,0,1,0,0,1,0)
+treatment <- gsub(1,"Sick",treatment_n) %>% gsub("0","Healthy",.)
+design.matrix <- bind_cols(ID=sample.id, treatment=treatment)
+
+pca_5X <- percMethylation(meth.filtered_5X) %>% t(.) %>% prcomp(.,center=T, scale. = F)
+percent_variance_pca_5X<-summary(pca_5X)$importance["Proportion of Variance",] * 100
+
+pca_plot_5X<-as_tibble(pca_5X$x) %>% bind_cols(design.matrix)
+
+png(file="/home/projects/ku-cbd/data/HoloFish/morten_fish/Epigenome/Novogene_CrappyFish_20samples_24Sep20_Analyses/PCA.png", width = 300, height = 600, units='mm', res = 300)
+ggplot(pca_plot_5X,aes(x=PC1, y=PC2, color=treatment,label= ID)) +
+  geom_point(size=3)  +
+  geom_text_repel(size=7) +
+  scale_color_manual(values=c("blue", "red"))+
+  xlab(label = paste("PC1 (",round(percent_variance_pca_5X[1],1),"percent of the total variance)")) +
+  ylab(label = paste("PC2 (",round(percent_variance_pca_5X[2],1),"percent of the total variance)"))+
+  ggtitle("PCA \n 5X threshold")+
+  coord_fixed(ratio = 1, xlim = NULL, ylim = NULL, expand = TRUE, clip = "on")+
+  theme_bw(base_size=16)+
+  theme(plot.title = element_text(hjust = 0.5))+
+  guides(color=guide_legend("Disease status"))
+  dev.off()
+
+#Figure 1.2: 
+c <- clusterSamples(meth.filtered_5X, dist="euclidean", filterByQuantile =T, sd.threshold =0.75, method="ward", plot=F)
+
+# Function to change color of the labels
+labelColors = c("red","blue")
+clusMember <- c("D1"=1, "D2"=1,"D3"=1,"D4"=2,"D5"=1, "D6"=2,"D8"=1,"D9"=1, "D10"=2, "D11"=1, "D12"=2,"D13"=1, "D14"=2,"D15"=2,"D16"=1, "D17"=2, "D18"=2, "D19"=1, "D20"=2) 
+
+colLab <- function(n) {
+  if (is.leaf(n)) {
+    a <- attributes(n)
+    labCol <- labelColors[clusMember[which(names(clusMember) == a$label)]]
+    attr(n, "nodePar") <- c(a$nodePar, lab.col = labCol)
+  }
+  n
+}
+# using dendrapply
+clusDendro = dendrapply(as.dendrogram(c), colLab)
+
+png("/home/projects/ku-cbd/data/HoloFish/morten_fish/Epigenome/Novogene_CrappyFish_20samples_24Sep20_Analyses/Clustering.png", width = 300, height = 600, units='mm', res = 300)
+plot(clusDendro, main = "Hierarchical Clustering", ylab = "Euclidean distance")
+dev.off()
+
+myDiff_5X<-calculateDiffMeth(meth.filtered_5X, mc.cores=40)
+mydmr<-edmr(myDiff_5X,dist=150,DMC.methdiff = 0,num.DMCs = 10)
+
+myDiff_t <- as_tibble(myDiff_5X) %>% subset(qvalue<=0.01)
+
+threshold_for_sig <- log10(max(myDiff_t$pvalue))
+
+SMP <- myDiff_t %>%
+  
+  # Compute chromosome size
+  group_by(chr) %>% 
+  summarise(chr_len=max(end)) %>% 
+  
+  # Calculate cumulative position of each chromosome
+  mutate(tot=cumsum(as.numeric(chr_len))-chr_len) %>%
+  dplyr::select(-chr_len) %>%
+  
+  # Add this info to the initial dataset
+  left_join(myDiff_t, ., by=c("chr"="chr")) %>%
+  
+  # Add a cumulative position of each SNP
+  arrange(chr, end) %>%
+  mutate( BPcum=end+tot) %>%
+  mutate(hypo= ifelse((meth.diff<0),-1,1)) %>%
+  mutate(SMvalue=hypo*(-log10(pvalue))) %>%
+  dplyr::mutate_if(.,is.character,stringr::str_replace_all, pattern = "NW_*.*", replacement = "Scaffolds") %>%
+  mutate(BPcum= if_else(chr == "Scaffolds", BPcum+50000000, BPcum))
+
+SMP_HL<-left_join(HL, SMP, by=c("seqnames"="chr", "start"="start"))
+axisdf = SMP %>% group_by(chr) %>% summarize(center=(max(BPcum) + min(BPcum) ) / 2 )
+SMP$text <-paste("Chromosome: ", SMP$chr, "\nPOSITION: ",SMP$end, "\nMeth.Diff: ", SMP$meth.diff)
+SMP_HL$text <-paste("Chromosome: ", SMP_HL$seqnames, "\nPOSITION: ",SMP_HL$end.x, "\nMeth.Diff: ", SMP_HL$meth.diff.x)
+
+p<-ggplot(SMP, aes(x=BPcum, y=(SMvalue), text=text)) +
+  
+  # Show all points
+  geom_point(aes(color=as.factor(chr)), alpha=0.2, size=1) +
+  scale_color_manual(values = rep(c("orange", "black"),600)) +
+  geom_point(data= SMP_HL,aes(x=BPcum,y=SMvalue,color=as.factor(seqnames)),size=1.2,alpha=1) +
+  
+  
+  # custom X axis:
+  scale_x_continuous( label = axisdf$chr, breaks= axisdf$center ) +
+  scale_y_continuous(expand = c(0, 0) ) +     # remove space between plot area and x axis
+  
+  geom_hline(yintercept=threshold_for_sig, linetype="dashed", color = "red")+
+  geom_hline(yintercept=-threshold_for_sig, linetype="dashed", color = "red")+
+  xlab("Position in genome") +
+  ylab("-log10(p-value)") +
+  ylim(-30,30)+
+  ggtitle("Sunset Manhattan Plot \n 5X threshold ")+
+
+  # Custom the theme:
+  theme_bw(base_size=16) +
+  theme(
+    axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1, size = 10),
+    legend.position="none",
+    panel.border = element_blank(),
+    panel.grid.major.x = element_blank(),
+    panel.grid.minor.x = element_blank(),
+    plot.title = element_text(hjust = 0.5))
+    
+ggplotly(p, tooltip="text")
+
+
+#clean
+rm(my_obj)
+rm(filtered.my_obj_1X)
+rm(filtered.my_obj_5X)
+rm(filtered.my_obj_10X)
+
+load("/home/projects/ku-cbd/data/HoloFish/morten_fish/Epigenome/Novogene_CrappyFish_20samples_24Sep20_Analyses/MethylKit_19samples_10X_5X_210901.RData")
+
+
+save.image(file ="/home/projects/ku-cbd/data/HoloFish/morten_fish/Epigenome/Novogene_CrappyFish_20samples_24Sep20_Analyses/MethylKit_19samples_10X_5X_1X_210901.RData")
+rm(meth.filtered_1X)
+save.image(file ="/home/projects/ku-cbd/data/HoloFish/morten_fish/Epigenome/Novogene_CrappyFish_20samples_24Sep20_Analyses/MethylKit_19samples_10X_5X_210901.RData")
+q()
+n
+
+
+png("/home/projects/ku-cbd/data/HoloFish/morten_fish/Epigenome/Novogene_CrappyFish_20samples_24Sep20_Analyses/Clustering.png", width = 300, height = 600, units='mm', res = 300)
+plot(clusDendro, main = "Hierarchical Clustering", ylab = "Euclidean distance")
+dev.off()

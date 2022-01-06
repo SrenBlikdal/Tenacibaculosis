@@ -1,0 +1,38 @@
+library(tidyverse)
+library(rtracklayer)
+library(methylKit)
+library(GenomicRanges)
+
+load("/home/projects/ku-cbd/data/HoloFish/morten_fish/Epigenome/Novogene_CrappyFish_20samples_24Sep20_Analyses/MethylKit_19samples_10X_5X_210901.RData")
+
+mean.meth<-percMethylation(meth.filtered_5X) %>% rowMeans(.)
+mean.meth_m<-bind_cols("chrom"=meth.filtered_5X$chr,"chromStart"=meth.filtered_5X$start,"chromEnd"=meth.filtered_5X$end, "mean.meth"=mean.meth) %>% as(.,"GRanges")
+
+
+inputnames<-c(seq(-3000, -50, by = 50),seq(50, 6000, by= 50))
+
+headder<-c("chrom","chromStart","chromEnd","name", "score", "strand")
+
+tt_all<-inputnames %>% map(function(x) read_tsv(paste0("/home/projects/ku-cbd/data/HoloFish/morten_fish/Epigenome/Novogene_CrappyFish_20samples_24Sep20_Analyses/8_annotation/GCF_000233375.1_ICSASG_v2_genomic_",x,"promoter.bed"), col_names = headder) %>% as(.,"GRanges") %>% subsetByOverlaps(mean.meth_m,.) %>% as_tibble() %>% transmute(mean= mean.meth, pos=x))
+
+
+all_sites<-myDiff_5X %>% as(., "GRanges")
+sig_sites<-myDiff_5X %>% as_tibble() %>% filter(qvalue<0.01) %>% as(.,"GRanges")
+headder<-c("chrom","start","end")
+
+p250<-read_tsv("/home/projects/ku-cbd/data/HoloFish/morten_fish/Epigenome/Novogene_CrappyFish_20samples_24Sep20_Analyses/8_annotation/GCF_000233375.1_ICSASG_v2_genomic_250promoter_merged.bed", col_names = headder) %>% transmute(chrom,start, end= end-1) %>% as(.,"GRanges")
+p1k<-read_tsv("/home/projects/ku-cbd/data/HoloFish/morten_fish/Epigenome/Novogene_CrappyFish_20samples_24Sep20_Analyses/8_annotation/GCF_000233375.1_ICSASG_v2_genomic_1Kpromoter_merged.bed", col_names = headder) %>% transmute(chrom,start, end= end-1) %>% as(.,"GRanges")
+p6k<-read_tsv("/home/projects/ku-cbd/data/HoloFish/morten_fish/Epigenome/Novogene_CrappyFish_20samples_24Sep20_Analyses/8_annotation/GCF_000233375.1_ICSASG_v2_genomic_6Kpromoter_merged.bed", col_names = headder) %>% transmute(chrom,start, end= end-1) %>% as(.,"GRanges")
+exon<-read_tsv("/home/projects/ku-cbd/data/HoloFish/morten_fish/Epigenome/Novogene_CrappyFish_20samples_24Sep20_Analyses/8_annotation/GCF_000233375.1_ICSASG_v2_genomic_exon_merged.bed", col_names = headder) %>% transmute(chrom,start, end= end-1) %>% as(.,"GRanges")
+intron<-read_tsv("/home/projects/ku-cbd/data/HoloFish/morten_fish/Epigenome/Novogene_CrappyFish_20samples_24Sep20_Analyses/8_annotation/GCF_000233375.1_ICSASG_v2_genomic_intron_merged.bed", col_names = headder) %>% transmute(chrom,start, end= end-1) %>% as(.,"GRanges")
+intergenic<-read_tsv("/home/projects/ku-cbd/data/HoloFish/morten_fish/Epigenome/Novogene_CrappyFish_20samples_24Sep20_Analyses/8_annotation/GCF_000233375.1_ICSASG_v2_genomic_intergenic_merged.bed", col_names = headder) %>% transmute(chrom,start, end= end-1) %>% as(.,"GRanges")
+
+tttt<-ttt %>% mutate(perc_sig= sig/sum_s, perc_all= all/sum_a) %>% transmute(feature,norm_sig=perc_sig/perc_all, norm_all=perc_all/perc_all)
+ttttt<-tttt %>% gather(., key="type", value ="measurement", -feature) 
+
+ggplot(ttttt, aes(x=feature, y=measurement, fill=factor(type)))+
+  geom_bar(stat="identity", position=position_dodge())+
+  scale_fill_brewer(palette="Paired")+
+  theme_minimal()
+  #scale_fill_manual("Genetic feature", values = c("DP" = "deepskyblue1", "MP" = "blue1", "PP" = "blue1", "Exon" ="green4", "Intron"= "green1", "Intergenic"= "indianred3"))+
+  theme_bw()

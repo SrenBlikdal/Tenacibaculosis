@@ -14,6 +14,19 @@ inputnames<-c(seq(-3000, -50, by = 50),seq(50, 6000, by= 50))
 headder<-c("chrom","chromStart","chromEnd","name", "score", "strand")
 
 tt_all<-inputnames %>% map(function(x) read_tsv(paste0("/home/projects/ku-cbd/data/HoloFish/morten_fish/Epigenome/Novogene_CrappyFish_20samples_24Sep20_Analyses/8_annotation/GCF_000233375.1_ICSASG_v2_genomic_",x,"promoter.bed"), col_names = headder) %>% as(.,"GRanges") %>% subsetByOverlaps(mean.meth_m,.) %>% as_tibble() %>% transmute(mean= mean.meth, pos=x))
+tt_10000<-inputnames %>% map(function(x) read_tsv(paste0("/home/projects/ku-cbd/data/HoloFish/morten_fish/Epigenome/Novogene_CrappyFish_20samples_24Sep20_Analyses/8_annotation/GCF_000233375.1_ICSASG_v2_genomic_10000_",x,"promoter.bed"), col_names = headder, show_col_types=F) %>% as(.,"GRanges") %>% subsetByOverlaps(mean.meth_m,.) %>% as_tibble() %>% transmute(mean= mean.meth, pos=x))
+tt_1000<-inputnames %>% map(function(x) read_tsv(paste0("/home/projects/ku-cbd/data/HoloFish/morten_fish/Epigenome/Novogene_CrappyFish_20samples_24Sep20_Analyses/8_annotation/GCF_000233375.1_ICSASG_v2_genomic_1000_",x,"promoter.bed"), col_names = headder, show_col_types=F) %>% as(.,"GRanges") %>% subsetByOverlaps(mean.meth_m,.) %>% as_tibble() %>% transmute(mean= mean.meth, pos=x))
+
+r_all<-bind_rows(tt_all) %>% group_by(pos) %>% summarise(., "m"=mean(mean), "sd" = sd(mean)) %>% mutate(., genes = "all_79000")
+r_10000<-bind_rows(tt_10000) %>% group_by(pos) %>% summarise(., "m"=mean(mean), "sd" = sd(mean)) %>% mutate(., genes = "top_10000")
+r_1000<-bind_rows(tt_1000) %>% group_by(pos) %>% summarise(., "m"=mean(mean), "sd" = sd(mean)) %>% mutate(., genes = "top_1000")
+
+rr<-bind_rows(r_all,r_10000,r_1000)
+
+ggplot(rr, aes(x=as.numeric(pos),y=m, color= genes))+
+  geom_point()
+  #geom_pointrange(aes(ymax = ifelse(m+sd>100,100,m+sd ), ymin = ifelse(m-sd<0, 0, m-sd)), fatten = 2.5)
+
 
 
 all_sites<-myDiff_5X %>% as(., "GRanges")

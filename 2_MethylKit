@@ -37,7 +37,7 @@ my_obj<-methRead(file.list, sample.id = list("D1","D2","D3","D4","D5","D6","D8",
 #treatment is meta data from Bozzi et al records:0 is healthy/Mycoplasma, 1 correspond to sick/Avivibro. 
 #context =CpG, means we only look at CpG sites 
 
-filtered.my_obj=filterByCoverage(my_obj,lo.count=5,lo.perc=NULL, hi.count=NULL,hi.perc=99.9)
+filtered.my_obj<-filterByCoverage(my_obj,lo.count=5,lo.perc=NULL, hi.count=NULL,hi.perc=99.9)
 
 meth.filtered<-unite(filtered.my_obj, destrand=F)
 

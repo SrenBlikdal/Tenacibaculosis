@@ -3,21 +3,21 @@ library(rtracklayer)
 library(methylKit)
 library(GenomicRanges)
 
-load("/home/projects/ku-cbd/data/HoloFish/morten_fish/Epigenome/Novogene_CrappyFish_20samples_24Sep20_Analyses/MethylKit_19samples_10X_5X_210901.RData")
+load("MethylKit_19samples.RData")
 
-mean.meth<-percMethylation(meth.filtered_5X) %>% rowMeans(.)
-mean.meth_m<-bind_cols("chrom"=meth.filtered_5X$chr,"chromStart"=meth.filtered_5X$start,"chromEnd"=meth.filtered_5X$end, "mean.meth"=mean.meth) %>% as(.,"GRanges")
+mean.meth<-percMethylation(meth.filtered) %>% rowMeans(.)
+mean.meth_m<-bind_cols("chrom"=meth.filtered$chr,"chromStart"=meth.filtered$start,"chromEnd"=meth.filtered$end, "mean.meth"=mean.meth) %>% as(.,"GRanges")
 
 
 inputnames<-c(seq(-3000, -50, by = 50),seq(50, 6000, by= 50))
 
 headder<-c("chrom","chromStart","chromEnd","name", "score", "strand")
 
-tt_all<-inputnames %>% map(function(x) read_tsv(paste0("/home/projects/ku-cbd/data/HoloFish/morten_fish/Epigenome/Novogene_CrappyFish_20samples_24Sep20_Analyses/8_annotation/GCF_000233375.1_ICSASG_v2_genomic_",x,"promoter.bed"), col_names = headder) %>% as(.,"GRanges") %>% subsetByOverlaps(mean.meth_m,.) %>% as_tibble() %>% transmute(mean= mean.meth, pos=x))
+tt_all<-inputnames %>% map(function(x) read_tsv(paste0("/home/projects/ku-cbd/data/HoloFish/morten_fish/Epigenome/Novogene_CrappyFish_20samples_24Sep20_Analyses/8_annotation/GCF_000233375.1_ICSASG_v2_genomic_23297_",x,"promoter.bed"), col_names = headder, show_col_types=F) %>% as(.,"GRanges") %>% subsetByOverlaps(mean.meth_m,.) %>% as_tibble() %>% transmute(mean= mean.meth, pos=x))
 tt_10000<-inputnames %>% map(function(x) read_tsv(paste0("/home/projects/ku-cbd/data/HoloFish/morten_fish/Epigenome/Novogene_CrappyFish_20samples_24Sep20_Analyses/8_annotation/GCF_000233375.1_ICSASG_v2_genomic_10000_",x,"promoter.bed"), col_names = headder, show_col_types=F) %>% as(.,"GRanges") %>% subsetByOverlaps(mean.meth_m,.) %>% as_tibble() %>% transmute(mean= mean.meth, pos=x))
 tt_1000<-inputnames %>% map(function(x) read_tsv(paste0("/home/projects/ku-cbd/data/HoloFish/morten_fish/Epigenome/Novogene_CrappyFish_20samples_24Sep20_Analyses/8_annotation/GCF_000233375.1_ICSASG_v2_genomic_1000_",x,"promoter.bed"), col_names = headder, show_col_types=F) %>% as(.,"GRanges") %>% subsetByOverlaps(mean.meth_m,.) %>% as_tibble() %>% transmute(mean= mean.meth, pos=x))
 
-r_all<-bind_rows(tt_all) %>% group_by(pos) %>% summarise(., "m"=mean(mean), "sd" = sd(mean)) %>% mutate(., genes = "all_79000")
+r_all<-bind_rows(tt_all) %>% group_by(pos) %>% summarise(., "m"=mean(mean), "sd" = sd(mean)) %>% mutate(., genes = "all_23297")
 r_10000<-bind_rows(tt_10000) %>% group_by(pos) %>% summarise(., "m"=mean(mean), "sd" = sd(mean)) %>% mutate(., genes = "top_10000")
 r_1000<-bind_rows(tt_1000) %>% group_by(pos) %>% summarise(., "m"=mean(mean), "sd" = sd(mean)) %>% mutate(., genes = "top_1000")
 
@@ -30,9 +30,9 @@ dev.off()
 
 
 
-all_sites<-myDiff_5X %>% as(., "GRanges")
-sig_sites<-myDiff_5X %>% as_tibble() %>% filter(qvalue<0.01) %>% as(.,"GRanges")
-sig_dmr<-edmr(myDiff_5X,dist=150,DMC.methdiff = 0,num.DMCs = 10)
+all_sites<-myDiff %>% as(., "GRanges")
+sig_sites<-myDiff %>% as_tibble() %>% filter(qvalue<0.01) %>% as(.,"GRanges")
+sig_dmr<-mydmr
 
 headder<-c("chrom","start","end")
 
@@ -56,9 +56,20 @@ length(subsetByOverlaps(all_sites,p1k, type = "within")),
 length(subsetByOverlaps(all_sites,p6k, type = "within")),
 length(subsetByOverlaps(all_sites,exon, type = "within")),
 length(subsetByOverlaps(all_sites,intron, type = "within")),
-length(subsetByOverlaps(all_sites,intergenic, type = "within"))))
+length(subsetByOverlaps(all_sites,intergenic, type = "within"))),
+dmr=c(
+length(subsetByOverlaps(sig_dmr,p250, type = "any")),
+length(subsetByOverlaps(sig_dmr,p1k, type = "any")),
+length(subsetByOverlaps(sig_dmr,p6k, type = "any")),
+length(subsetByOverlaps(sig_dmr,exon, type = "any")),
+length(subsetByOverlaps(sig_dmr,intron, type = "any")),
+length(subsetByOverlaps(sig_dmr,intergenic, type = "any")))
+)
 
-tttt<-ttt %>% mutate(perc_sig= sig/sum_s, perc_all= all/sum_a) %>% transmute(feature,norm_sig=perc_sig/perc_all, norm_all=perc_all/perc_all)
+sum_s
+
+
+tttt<-ttt %>% mutate(perc_sig= sig/sum(ttt$sig), perc_all= all/sum(ttt$all), perc_dmr= dmr/sum(ttt$dmr)) %>% transmute(feature,norm_sig=perc_sig/perc_all, norm_dmr=perc_dmr/perc_all, norm_all=perc_all/perc_all)
 ttttt<-tttt %>% gather(., key="type", value ="measurement", -feature) 
 
 png("/home/projects/ku-cbd/data/HoloFish/morten_fish/Epigenome/Novogene_CrappyFish_20samples_24Sep20_Analyses/DMRs.png", width = 1000, height = 400, units='mm', res = 300)
@@ -69,3 +80,5 @@ ggplot(ttttt, aes(x=feature, y=measurement, fill=factor(type)))+
   #scale_fill_manual("Genetic feature", values = c("DP" = "deepskyblue1", "MP" = "blue1", "PP" = "blue1", "Exon" ="green4", "Intron"= "green1", "Intergenic"= "indianred3"))+
   theme_bw()
 dev.off()
+
+subsetByOverlaps(mean.meth_m,p) %>% as_tibble() %>% transmute(mean= mean.meth, pos=x))

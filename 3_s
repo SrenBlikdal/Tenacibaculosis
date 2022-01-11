@@ -9,7 +9,7 @@ mean.meth<-percMethylation(meth.filtered) %>% rowMeans(.)
 mean.meth_m<-bind_cols("chrom"=meth.filtered$chr,"chromStart"=meth.filtered$start,"chromEnd"=meth.filtered$end, "mean.meth"=mean.meth) %>% as(.,"GRanges")
 
 
-inputnames<-c(seq(-3000, -50, by = 50),seq(50, 6000, by= 50))
+inputnames<-c(seq(-10000, -50, by = 50),seq(50, 10000, by= 50))
 
 headder<-c("chrom","chromStart","chromEnd","name", "score", "strand")
 

@@ -43,7 +43,7 @@ exon<-read_tsv("/home/projects/ku-cbd/data/HoloFish/morten_fish/Epigenome/Novoge
 intron<-read_tsv("/home/projects/ku-cbd/data/HoloFish/morten_fish/Epigenome/Novogene_CrappyFish_20samples_24Sep20_Analyses/8_annotation/GCF_000233375.1_ICSASG_v2_genomic_intron_merged.bed", col_names = headder) %>% transmute(chrom,start, end= end-1) %>% as(.,"GRanges")
 intergenic<-read_tsv("/home/projects/ku-cbd/data/HoloFish/morten_fish/Epigenome/Novogene_CrappyFish_20samples_24Sep20_Analyses/8_annotation/GCF_000233375.1_ICSASG_v2_genomic_intergenic_merged.bed", col_names = headder) %>% transmute(chrom,start, end= end-1) %>% as(.,"GRanges")
 
-ttt<-tibble(feature=c("4_PP", "5_MP", "6_DP", "3_Exon", "2_Intron", "1_intergenic"),sig=c(
+ttt<-tibble(feature=c("3_PP", "2_MP", "1_DP", "4_Exon", "5_Intron", "6_intergenic"),sig=c(
 length(subsetByOverlaps(sig_sites,p250, type = "within")),
 length(subsetByOverlaps(sig_sites,p1k, type = "within")),
 length(subsetByOverlaps(sig_sites,p6k, type = "within")),
@@ -56,7 +56,9 @@ length(subsetByOverlaps(all_sites,p1k, type = "within")),
 length(subsetByOverlaps(all_sites,p6k, type = "within")),
 length(subsetByOverlaps(all_sites,exon, type = "within")),
 length(subsetByOverlaps(all_sites,intron, type = "within")),
-length(subsetByOverlaps(all_sites,intergenic, type = "within"))),
+length(subsetByOverlaps(all_sites,intergenic, type = "within")))
+)
+
 dmr=c(
 length(subsetByOverlaps(sig_dmr,p250, type = "any")),
 length(subsetByOverlaps(sig_dmr,p1k, type = "any")),
@@ -64,12 +66,12 @@ length(subsetByOverlaps(sig_dmr,p6k, type = "any")),
 length(subsetByOverlaps(sig_dmr,exon, type = "any")),
 length(subsetByOverlaps(sig_dmr,intron, type = "any")),
 length(subsetByOverlaps(sig_dmr,intergenic, type = "any")))
-)
+
 
 sum_s
 
 
-tttt<-ttt %>% mutate(perc_sig= sig/sum(ttt$sig), perc_all= all/sum(ttt$all), perc_dmr= dmr/sum(ttt$dmr)) %>% transmute(feature,norm_sig=perc_sig/perc_all, norm_dmr=perc_dmr/perc_all, norm_all=perc_all/perc_all)
+tttt<-ttt %>% mutate(perc_sig= sig/sum(ttt$sig), perc_all= all/sum(ttt$all)) %>% transmute(feature,norm_sig=perc_sig/perc_all, norm_all=perc_all/perc_all)
 ttttt<-tttt %>% gather(., key="type", value ="measurement", -feature) 
 
 png("/home/projects/ku-cbd/data/HoloFish/morten_fish/Epigenome/Novogene_CrappyFish_20samples_24Sep20_Analyses/DMRs.png", width = 1000, height = 400, units='mm', res = 300)

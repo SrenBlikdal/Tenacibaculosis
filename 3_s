@@ -28,6 +28,12 @@ ggplot(rr, aes(x=as.numeric(pos),y=m, color= genes))+
   #geom_pointrange(aes(ymax = ifelse(m+sd>100,100,m+sd ), ymin = ifelse(m-sd<0, 0, m-sd)), fatten = 2.5)
 dev.off()
 
+ggplot(rr, aes(x=as.numeric(pos),y=m))+
+geom_point()+
+ylab("Mean methylation")+
+xlab("Position from TSS")+ 
+theme_bw(base_size=16) 
+
 
 
 all_sites<-myDiff %>% as(., "GRanges")

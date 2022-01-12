@@ -43,35 +43,39 @@ sig_dmr<-mydmr
 headder<-c("chrom","start","end")
 
 p250<-read_tsv("/home/projects/ku-cbd/data/HoloFish/morten_fish/Epigenome/Novogene_CrappyFish_20samples_24Sep20_Analyses/8_annotation/GCF_000233375.1_ICSASG_v2_genomic_250promoter_merged.bed", col_names = headder) %>% transmute(chrom,start, end= end-1) %>% as(.,"GRanges")
-p1k<-read_tsv("/home/projects/ku-cbd/data/HoloFish/morten_fish/Epigenome/Novogene_CrappyFish_20samples_24Sep20_Analyses/8_annotation/GCF_000233375.1_ICSASG_v2_genomic_1Kpromoter_merged.bed", col_names = headder) %>% transmute(chrom,start, end= end-1) %>% as(.,"GRanges")
-p6k<-read_tsv("/home/projects/ku-cbd/data/HoloFish/morten_fish/Epigenome/Novogene_CrappyFish_20samples_24Sep20_Analyses/8_annotation/GCF_000233375.1_ICSASG_v2_genomic_6Kpromoter_merged.bed", col_names = headder) %>% transmute(chrom,start, end= end-1) %>% as(.,"GRanges")
+p750<-read_tsv("/home/projects/ku-cbd/data/HoloFish/morten_fish/Epigenome/Novogene_CrappyFish_20samples_24Sep20_Analyses/8_annotation/GCF_000233375.1_ICSASG_v2_genomic_750promoter_merged.bed", col_names = headder) %>% transmute(chrom,start, end= end-1) %>% as(.,"GRanges")
+p5000<-read_tsv("/home/projects/ku-cbd/data/HoloFish/morten_fish/Epigenome/Novogene_CrappyFish_20samples_24Sep20_Analyses/8_annotation/GCF_000233375.1_ICSASG_v2_genomic_5000promoter_merged.bed", col_names = headder) %>% transmute(chrom,start, end= end-1) %>% as(.,"GRanges")
+GB2500<-read_tsv("/home/projects/ku-cbd/data/HoloFish/morten_fish/Epigenome/Novogene_CrappyFish_20samples_24Sep20_Analyses/8_annotation/GCF_000233375.1_ICSASG_v2_genomic_2500GB_merged.bed", col_names = headder) %>% transmute(chrom,start, end= end-1) %>% as(.,"GRanges")
 exon<-read_tsv("/home/projects/ku-cbd/data/HoloFish/morten_fish/Epigenome/Novogene_CrappyFish_20samples_24Sep20_Analyses/8_annotation/GCF_000233375.1_ICSASG_v2_genomic_exon_merged.bed", col_names = headder) %>% transmute(chrom,start, end= end-1) %>% as(.,"GRanges")
 intron<-read_tsv("/home/projects/ku-cbd/data/HoloFish/morten_fish/Epigenome/Novogene_CrappyFish_20samples_24Sep20_Analyses/8_annotation/GCF_000233375.1_ICSASG_v2_genomic_intron_merged.bed", col_names = headder) %>% transmute(chrom,start, end= end-1) %>% as(.,"GRanges")
 intergenic<-read_tsv("/home/projects/ku-cbd/data/HoloFish/morten_fish/Epigenome/Novogene_CrappyFish_20samples_24Sep20_Analyses/8_annotation/GCF_000233375.1_ICSASG_v2_genomic_intergenic_merged.bed", col_names = headder) %>% transmute(chrom,start, end= end-1) %>% as(.,"GRanges")
 
-ttt<-tibble(feature=c("3_PP", "2_MP", "1_DP", "4_Exon", "5_Intron", "6_intergenic"),sig=c(
+ttt<-tibble(feature=c("3_PP", "2_MP", "1_DP", "4_Start_GB", "5_Exon", "6_Intron", "7_intergenic"),sig=c(
 length(subsetByOverlaps(sig_sites,p250, type = "within")),
-length(subsetByOverlaps(sig_sites,p1k, type = "within")),
-length(subsetByOverlaps(sig_sites,p6k, type = "within")),
+length(subsetByOverlaps(sig_sites,p750, type = "within")),
+length(subsetByOverlaps(sig_sites,p5000, type = "within")),
+length(subsetByOverlaps(sig_sites,GB2500, type = "within")),
 length(subsetByOverlaps(sig_sites,exon, type = "within")),
 length(subsetByOverlaps(sig_sites,intron, type = "within")),
 length(subsetByOverlaps(sig_sites,intergenic, type = "within"))
 ), all=c(
 length(subsetByOverlaps(all_sites,p250, type = "within")),
-length(subsetByOverlaps(all_sites,p1k, type = "within")),
-length(subsetByOverlaps(all_sites,p6k, type = "within")),
+length(subsetByOverlaps(all_sites,p750, type = "within")),
+length(subsetByOverlaps(all_sites,p5000, type = "within")),
+length(subsetByOverlaps(all_sites,GB2500, type = "within")),
 length(subsetByOverlaps(all_sites,exon, type = "within")),
 length(subsetByOverlaps(all_sites,intron, type = "within")),
 length(subsetByOverlaps(all_sites,intergenic, type = "within")))
 )
 
-dmr=c(
-length(subsetByOverlaps(sig_dmr,p250, type = "any")),
-length(subsetByOverlaps(sig_dmr,p1k, type = "any")),
-length(subsetByOverlaps(sig_dmr,p6k, type = "any")),
-length(subsetByOverlaps(sig_dmr,exon, type = "any")),
-length(subsetByOverlaps(sig_dmr,intron, type = "any")),
-length(subsetByOverlaps(sig_dmr,intergenic, type = "any")))
+
+length(subsetByOverlaps(sig_dmr,p250, type = "any"))
+length(subsetByOverlaps(sig_dmr,p750, type = "any"))
+length(subsetByOverlaps(sig_dmr,p5000, type = "any"))
+length(subsetByOverlaps(sig_dmr,GB2500, type = "any"))
+length(subsetByOverlaps(sig_dmr,exon, type = "any"))
+length(subsetByOverlaps(sig_dmr,intron, type = "any"))
+length(subsetByOverlaps(sig_dmr,intergenic, type = "any"))
 
 
 sum_s
@@ -84,7 +88,7 @@ png("/home/projects/ku-cbd/data/HoloFish/morten_fish/Epigenome/Novogene_CrappyFi
 ggplot(ttttt, aes(x=feature, y=measurement, fill=factor(type)))+
   geom_bar(stat="identity", position=position_dodge())+
   scale_fill_brewer(palette="Paired")+
-  theme_minimal()
+  theme_minimal()+
   #scale_fill_manual("Genetic feature", values = c("DP" = "deepskyblue1", "MP" = "blue1", "PP" = "blue1", "Exon" ="green4", "Intron"= "green1", "Intergenic"= "indianred3"))+
   theme_bw()
 dev.off()

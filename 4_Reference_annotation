@@ -116,6 +116,6 @@ awk '{if($3=="exon")print $0}' GCF_000233375.1_ICSASG_v2_genomic.gff | convert2b
 bedtools subtract -a GCF_000233375.1_ICSASG_v2_genomic_gene.bed -b GCF_000233375.1_ICSASG_v2_genomic_exon_merged.bed | bedtools subtract -a stdin -b GCF_000233375.1_ICSASG_v2_genomic_promoter+2500GB_merged.bed |bedtools sort | bedtools merge > GCF_000233375.1_ICSASG_v2_genomic_intron_merged.bed
 
 ## Make BED of only intergenic regions (all the rest)
-cat *merged.bed | bedtools sort | bedtools merge | bedtools complement -i stdin -g GCF_000233375.1_ICSASG_v2_genomic_chrlength_sorted.txt | bedtools subtract -a stdin -b GCF_000233375.1_ICSASG_v2_genomic_gene.bed | bedtools sort | bedtools merge > GCF_000233375.1_ICSASG_v2_genomic_intergenic_merged.bed
+bedtools complement -i GCF_000233375.1_ICSASG_v2_genomic_gene.bed -g GCF_000233375.1_ICSASG_v2_genomic_chrlength_sorted.txt | bedtools subtract -a stdin -b GCF_000233375.1_ICSASG_v2_genomic_promoter+2500GB_merged.bed | bedtools sort | bedtools merge > GCF_000233375.1_ICSASG_v2_genomic_intergenic_merged.bed
 
 

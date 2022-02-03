@@ -21,6 +21,6 @@ colLab <- function(n) {
 clusDendro = dendrapply(as.dendrogram(c), colLab)
 clusDendro = dendrapply(as.dendrogram(c), colLab) %>% set("leaves_pch", 19) %>% set("leaves_col",c("red","red","blue","red","red","blue","red","blue","red","red","red","red","red","blue","blue","blue","blue","blue","blue"))
 
-png("/home/projects/ku-cbd/data/HoloFish/morten_fish/Epigenome/Novogene_CrappyFish_20samples_24Sep20_Analyses/Clustering.png", width = 300, height = 600, units='mm', res = 300)
+png("/home/projects/ku-cbd/data/HoloFish/morten_fish/Epigenome/Novogene_CrappyFish_20samples_24Sep20_Analyses/Clustering.png", width = 300, height = 300, units='mm', res = 300)
 plot(clusDendro, main = "Hierarchical Clustering", ylab = "Euclidean distance")
 dev.off()

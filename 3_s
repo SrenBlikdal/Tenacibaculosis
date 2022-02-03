@@ -6,7 +6,15 @@ library(GenomicRanges)
 load("MethylKit_19samples.RData")
 
 mean.meth<-percMethylation(meth.filtered) %>% rowMeans(.)
+
+mean.meth_H<-reorganize(meth.filtered,sample.ids=c("D4","D6","D10","D12","D14","D15","D17","D18","D20")) %>% percMethylation(meth.filtered) %>% rowMeans(.)
+mean.meth_S<-reorganize(meth.filtered,sample.ids=c("D1","D2","D3","D5","D8","D9","D11","D13","D16","D19")) %>% percMethylation(meth.filtered) %>% rowMeans(.)
+
+mean.meth_H_m<-bind_cols("chrom"=meth.filtered$chr,"chromStart"=meth.filtered$start,"chromEnd"=meth.filtered$end, "mean.meth"=mean.meth_H) %>% as(.,"GRanges")
+mean.meth_S_m<-bind_cols("chrom"=meth.filtered$chr,"chromStart"=meth.filtered$start,"chromEnd"=meth.filtered$end, "mean.meth"=mean.meth_S) %>% as(.,"GRanges")
+
 mean.meth_m<-bind_cols("chrom"=meth.filtered$chr,"chromStart"=meth.filtered$start,"chromEnd"=meth.filtered$end, "mean.meth"=mean.meth) %>% as(.,"GRanges")
+
 
 
 inputnames<-c(seq(-10000, -50, by = 50),seq(50, 10000, by= 50))

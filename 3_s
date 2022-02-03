@@ -5,17 +5,18 @@ library(GenomicRanges)
 
 load("MethylKit_19samples.RData")
 
+mf_H<-reorganize(meth.filtered,sample.ids=c("D4","D6","D10","D12","D14","D15","D17","D18","D20"), treatment=c(0,0,0,0,0,0,0,0,0)) 
+mf_S<-reorganize(meth.filtered,sample.ids=c("D1","D2","D3","D5","D8","D9","D11","D13","D16","D19"), treatment=c(0,0,1,1,1,1,1,1,1,1))
+
 mean.meth<-percMethylation(meth.filtered) %>% rowMeans(.)
 
-mean.meth_H<-reorganize(meth.filtered,sample.ids=c("D4","D6","D10","D12","D14","D15","D17","D18","D20")) %>% percMethylation(meth.filtered) %>% rowMeans(.)
-mean.meth_S<-reorganize(meth.filtered,sample.ids=c("D1","D2","D3","D5","D8","D9","D11","D13","D16","D19")) %>% percMethylation(meth.filtered) %>% rowMeans(.)
+mean.meth_H<-reorganize(meth.filtered,sample.ids=c("D4","D6","D10","D12","D14","D15","D17","D18","D20"), treatment=c(0,0,0,0,0,0,0,0,0)) %>% percMethylation(.) %>% rowMeans(.)
+mean.meth_S<-reorganize(meth.filtered,sample.ids=c("D1","D2","D3","D5","D8","D9","D11","D13","D16","D19"), treatment=c(1,1,1,1,1,1,1,1,1,1)) %>% percMethylation(.) %>% rowMeans(.)
 
 mean.meth_H_m<-bind_cols("chrom"=meth.filtered$chr,"chromStart"=meth.filtered$start,"chromEnd"=meth.filtered$end, "mean.meth"=mean.meth_H) %>% as(.,"GRanges")
 mean.meth_S_m<-bind_cols("chrom"=meth.filtered$chr,"chromStart"=meth.filtered$start,"chromEnd"=meth.filtered$end, "mean.meth"=mean.meth_S) %>% as(.,"GRanges")
 
 mean.meth_m<-bind_cols("chrom"=meth.filtered$chr,"chromStart"=meth.filtered$start,"chromEnd"=meth.filtered$end, "mean.meth"=mean.meth) %>% as(.,"GRanges")
-
-
 
 inputnames<-c(seq(-10000, -50, by = 50),seq(50, 10000, by= 50))
 
@@ -29,18 +30,24 @@ r_all<-bind_rows(tt_all) %>% group_by(pos) %>% summarise(., "m"=mean(mean), "sd"
 r_10000<-bind_rows(tt_10000) %>% group_by(pos) %>% summarise(., "m"=mean(mean), "sd" = sd(mean)) %>% mutate(., genes = "top_10000")
 r_1000<-bind_rows(tt_1000) %>% group_by(pos) %>% summarise(., "m"=mean(mean), "sd" = sd(mean)) %>% mutate(., genes = "top_1000")
 
-rr<-bind_rows(r_all,r_10000,r_1000)
-png("/home/projects/ku-cbd/data/HoloFish/morten_fish/Epigenome/Novogene_CrappyFish_20samples_24Sep20_Analyses/mean_meth.png", width = 1000, height = 400, units='mm', res = 300)
-ggplot(rr, aes(x=as.numeric(pos),y=m, color= genes))+
-  geom_point()
-  #geom_pointrange(aes(ymax = ifelse(m+sd>100,100,m+sd ), ymin = ifelse(m-sd<0, 0, m-sd)), fatten = 2.5)
-dev.off()
+tt_all_H<-inputnames %>% map(function(x) read_tsv(paste0("/home/projects/ku-cbd/data/HoloFish/morten_fish/Epigenome/Novogene_CrappyFish_20samples_24Sep20_Analyses/8_annotation/GCF_000233375.1_ICSASG_v2_genomic_23297_",x,"promoter.bed"), col_names = headder, show_col_types=F) %>% as(.,"GRanges") %>% subsetByOverlaps(mean.meth_H_m,.) %>% as_tibble() %>% transmute(mean=mean.meth, pos=x))
+tt_all_S<-inputnames %>% map(function(x) read_tsv(paste0("/home/projects/ku-cbd/data/HoloFish/morten_fish/Epigenome/Novogene_CrappyFish_20samples_24Sep20_Analyses/8_annotation/GCF_000233375.1_ICSASG_v2_genomic_23297_",x,"promoter.bed"), col_names = headder, show_col_types=F) %>% as(.,"GRanges") %>% subsetByOverlaps(mean.meth_S_m,.) %>% as_tibble() %>% transmute(mean=mean.meth, pos=x))
 
-ggplot(rr, aes(x=as.numeric(pos),y=m))+
-geom_point()+
+r_all_H<-bind_rows(tt_all_H) %>% group_by(pos) %>% summarise(., "m"=mean(mean), "sd" = sd(mean)) %>% mutate(., DS = "Healthy")
+r_all_S<-bind_rows(tt_all_S) %>% group_by(pos) %>% summarise(., "m"=mean(mean), "sd" = sd(mean)) %>% mutate(., DS = "Sick")
+
+rr<-bind_rows(r_all_H,r_all_S)
+rrr<-filter(rr, pos>=-6000) %>% filter(pos<=4000)
+
+png("/home/projects/ku-cbd/data/HoloFish/morten_fish/Epigenome/Novogene_CrappyFish_20samples_24Sep20_Analyses/mean_meth.png", width = 1000, height = 400, units='mm', res = 300)
+ggplot(rrr, aes(x=as.numeric(pos),y=m, color=DS))+
+geom_line(size=2)+
 ylab("Mean methylation")+
 xlab("Position from TSS")+ 
-theme_bw(base_size=16) 
+scale_color_manual(values=c("blue", "red"))+
+theme_bw(base_size=16)+
+guides(color=guide_legend("Disease status"))
+dev.off()
 
 
 

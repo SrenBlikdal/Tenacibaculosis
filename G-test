@@ -1,0 +1,56 @@
+library(tidyverse)
+library(rtracklayer)
+library(methylKit)
+library(GenomicRanges)
+library(DescTools)
+
+load("MethylKit_19samples.RData")
+
+all_sites<-myDiff %>% as(., "GRanges")
+sig_sites<-myDiff %>% as_tibble() %>% filter(qvalue<0.01) %>% as(.,"GRanges")
+sig_dmr<-mydmr
+
+headder<-c("chrom","start","end")
+
+p250<-read_tsv("/home/projects/ku-cbd/data/HoloFish/morten_fish/Epigenome/Novogene_CrappyFish_20samples_24Sep20_Analyses/8_annotation/GCF_000233375.1_ICSASG_v2_genomic_250promoter_merged.bed", col_names = headder) %>% transmute(chrom,start, end= end-1) %>% as(.,"GRanges")
+p750<-read_tsv("/home/projects/ku-cbd/data/HoloFish/morten_fish/Epigenome/Novogene_CrappyFish_20samples_24Sep20_Analyses/8_annotation/GCF_000233375.1_ICSASG_v2_genomic_750promoter_merged.bed", col_names = headder) %>% transmute(chrom,start, end= end-1) %>% as(.,"GRanges")
+p5000<-read_tsv("/home/projects/ku-cbd/data/HoloFish/morten_fish/Epigenome/Novogene_CrappyFish_20samples_24Sep20_Analyses/8_annotation/GCF_000233375.1_ICSASG_v2_genomic_5000promoter_merged.bed", col_names = headder) %>% transmute(chrom,start, end= end-1) %>% as(.,"GRanges")
+GB2500<-read_tsv("/home/projects/ku-cbd/data/HoloFish/morten_fish/Epigenome/Novogene_CrappyFish_20samples_24Sep20_Analyses/8_annotation/GCF_000233375.1_ICSASG_v2_genomic_2500GB_merged.bed", col_names = headder) %>% transmute(chrom,start, end= end-1) %>% as(.,"GRanges")
+exon<-read_tsv("/home/projects/ku-cbd/data/HoloFish/morten_fish/Epigenome/Novogene_CrappyFish_20samples_24Sep20_Analyses/8_annotation/GCF_000233375.1_ICSASG_v2_genomic_exon_merged.bed", col_names = headder) %>% transmute(chrom,start, end= end-1) %>% as(.,"GRanges")
+intron<-read_tsv("/home/projects/ku-cbd/data/HoloFish/morten_fish/Epigenome/Novogene_CrappyFish_20samples_24Sep20_Analyses/8_annotation/GCF_000233375.1_ICSASG_v2_genomic_intron_merged.bed", col_names = headder) %>% transmute(chrom,start, end= end-1) %>% as(.,"GRanges")
+intergenic<-read_tsv("/home/projects/ku-cbd/data/HoloFish/morten_fish/Epigenome/Novogene_CrappyFish_20samples_24Sep20_Analyses/8_annotation/GCF_000233375.1_ICSASG_v2_genomic_intergenic_merged.bed", col_names = headder) %>% transmute(chrom,start, end= end-1) %>% as(.,"GRanges")
+
+ttt<-tibble(feature=c("3_PP", "2_MP", "1_DP", "4_Start_GB", "5_Exon", "6_Intron", "7_intergenic"),sig=c(
+length(subsetByOverlaps(sig_sites,p250, type = "within")),
+length(subsetByOverlaps(sig_sites,p750, type = "within")),
+length(subsetByOverlaps(sig_sites,p5000, type = "within")),
+length(subsetByOverlaps(sig_sites,GB2500, type = "within")),
+length(subsetByOverlaps(sig_sites,exon, type = "within")),
+length(subsetByOverlaps(sig_sites,intron, type = "within")),
+length(subsetByOverlaps(sig_sites,intergenic, type = "within"))
+), all=c(
+length(subsetByOverlaps(all_sites,p250, type = "within")),
+length(subsetByOverlaps(all_sites,p750, type = "within")),
+length(subsetByOverlaps(all_sites,p5000, type = "within")),
+length(subsetByOverlaps(all_sites,GB2500, type = "within")),
+length(subsetByOverlaps(all_sites,exon, type = "within")),
+length(subsetByOverlaps(all_sites,intron, type = "within")),
+length(subsetByOverlaps(all_sites,intergenic, type = "within")))
+)
+
+GTest(matrix(c(ttt$sig,ttt$all),nrow = 2, byrow = T))
+GT1<-GTest(matrix(c(ttt$sig[1],sum(ttt$sig)-ttt$sig[1],ttt$all[1],sum(ttt$all)-ttt$all[1]),nrow = 2, byrow = T))
+GT2<-GTest(matrix(c(ttt$sig[2],sum(ttt$sig)-ttt$sig[2],ttt$all[2],sum(ttt$all)-ttt$all[2]),nrow = 2, byrow = T))
+GT3<-GTest(matrix(c(ttt$sig[3],sum(ttt$sig)-ttt$sig[3],ttt$all[3],sum(ttt$all)-ttt$all[3]),nrow = 2, byrow = T))
+GT4<-GTest(matrix(c(ttt$sig[4],sum(ttt$sig)-ttt$sig[4],ttt$all[4],sum(ttt$all)-ttt$all[4]),nrow = 2, byrow = T))
+GT5<-GTest(matrix(c(ttt$sig[5],sum(ttt$sig)-ttt$sig[5],ttt$all[5],sum(ttt$all)-ttt$all[5]),nrow = 2, byrow = T))
+GT6<-GTest(matrix(c(ttt$sig[6],sum(ttt$sig)-ttt$sig[6],ttt$all[6],sum(ttt$all)-ttt$all[6]),nrow = 2, byrow = T))
+GT7<-GTest(matrix(c(ttt$sig[7],sum(ttt$sig)-ttt$sig[7],ttt$all[7],sum(ttt$all)-ttt$all[7]),nrow = 2, byrow = T))
+
+
+
+
+
+
+
+

@@ -1,0 +1,13 @@
+library(tidyverse)
+library(rtracklayer)
+library(methylKit)
+library(GenomicRanges)
+library(DescTools)
+
+load("MethylKit_19samples.RData")
+
+mean.meth_H<-reorganize(meth.filtered,sample.ids=c("D4","D6","D10","D12","D14","D15","D17","D18","D20"), treatment=c(0,0,0,0,0,0,0,0,0)) %>% percMethylation(.) %>% rowMeans(.)
+mean.meth_S<-reorganize(meth.filtered,sample.ids=c("D1","D2","D3","D5","D8","D9","D11","D13","D16","D19"), treatment=c(1,1,1,1,1,1,1,1,1,1)) %>% percMethylation(.) %>% rowMeans(.)
+
+mean.meth_H_m<-bind_cols("chrom"=meth.filtered$chr,"chromStart"=meth.filtered$start,"chromEnd"=meth.filtered$end, "mean.meth"=mean.meth_H) %>% as(.,"GRanges")
+mean.meth_S_m<-bind_cols("chrom"=meth.filtered$chr,"chromStart"=meth.filtered$start,"chromEnd"=meth.filtered$end, "mean.meth"=mean.meth_S) %>% as(.,"GRanges")

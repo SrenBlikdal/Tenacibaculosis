@@ -5,6 +5,7 @@ library(tidyverse)
 library(qqman)
 library("QCEWAS")
 library(plotly)
+library(ggrepel)
 
 #Read EWAS data and DMR information 
 load("methylKit_small.RData")
@@ -39,25 +40,20 @@ SMP <- myDiff_t %>%
   mutate(SMvalue=hypo*(-log10(pvalue))) %>%
   dplyr::mutate_if(.,is.character,stringr::str_replace_all, pattern = "NW_*.*", replacement = "Scaffolds")
 
-#Prepare DMRs  
+#Prepare DMR IDs  
 mydmr$DMR<-c(1:70)
-DMR<-subsetByOverlaps(as(myDiff_t,"GRanges"),mydmr) %>% as_tibble()
-SMP_DMR<-left_join(DMR, SMP, by=c("seqnames"="chr", "start"="start"))
-
-gr1<-(as(myDiff_t,"GRanges"))
-m <- findOverlaps(gr1,mydmr)
-gr1.matched <- gr1[queryHits(m)]
-mcols(gr1.matched) <- cbind.data.frame(
-  mcols(gr1.matched),
-  mcols(mydmr[subjectHits(m)]))
-gr1.matched
+myDiff_gr<-(as(myDiff_t,"GRanges"))
+ol <- findOverlaps(gr1,mydmr)
+myDiff_DMR <- myDiff_gr[queryHits(ol)]
+mcols(myDiff_DMR) <- cbind.data.frame(mcols(myDiff_gr.ol),mcols(mydmr[subjectHits(ol)]))
+myDiff_DMR_t<-as_tibble(myDiff_DMR)
 
 #Costumize x-axis 
 axisdf = SMP %>% group_by(chr) %>% summarize(center=(max(BPcum) + min(BPcum) ) / 2 ) %>% left_join(.,refseq_to_ID) %>% mutate(ID = replace_na(ID, "Scaffolds"))
 
 #Prepare text for interactive version
 SMP$text <-paste("Chromosome: ", SMP$chr, "\nPOSITION: ",SMP$start, "\nMeth.Diff: ", SMP$meth.diff)
-SMP_DMR$text <-paste("Chromosome: ", SMP_DMR$seqnames, "\nPOSITION: ",SMP_DMR$end.x, "\nMeth.Diff: ", SMP_DMR$meth.diff.x, "\nDMR:", gr1.matched$DMR)
+myDiff_DMR_t$text <-paste("Chromosome: ", myDiff_DMR$seqnames, "\nPOSITION: ",myDiff_DMR$end.x, "\nMeth.Diff: ", myDiff_DMR$meth.diff.x, "\nDMR:", myDiff_DMR$DMR)
 
 #Gather everything in one plot
 p<-ggplot(SMP, aes(x=BPcum, y=SMvalue, text = text)) +
@@ -66,13 +62,11 @@ p<-ggplot(SMP, aes(x=BPcum, y=SMvalue, text = text)) +
   geom_point(aes(color=as.factor(chr)), alpha=0.2, size=1) +
   scale_color_manual(values = rep(c("orange", "black"),600)) +
   annotate(geom = "text",label=axisdf$ID, x=axisdf$center, y=rep(c(2,0,-2),10), angle=90)+
-  geom_point(data= SMP_DMR,aes(x=BPcum,y=SMvalue,color=as.factor(seqnames)),size=1.2,alpha=1) +
-  
+  geom_point(data= myDiff_DMR_t,aes(x=BPcum,y=SMvalue,color=as.factor(seqnames)),size=1.2,alpha=1) +
+  #geom_label_repel(myDiff_DMR,aes(label=DMR))+
   
   # custom X axis:
-  #geom_label(aes(label = axisdf$chr, x= axisdf$center, y=axisdf$posy)) +
-  scale_y_continuous(labels = c(30,20,10,0,10,20,30), breaks = c(-30,-20,-10,0,10,20,30), position = "right") +     # remove space between plot area and x axis
-  
+  scale_y_continuous(labels = c(30,20,10,0,10,20,30), breaks = c(-30,-20,-10,0,10,20,30), position = "right") +
   geom_hline(yintercept=threshold_for_sig, linetype="dashed", color = "red")+
   geom_hline(yintercept=-threshold_for_sig, linetype="dashed", color = "red")+
   xlab("Position in genome") +

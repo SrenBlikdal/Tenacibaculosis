@@ -6,13 +6,15 @@ library(qqman)
 library("QCEWAS")
 library(plotly)
 
+#Read EWAS data and DMR information 
+load("methylKit_small.RData")
 methylkitworkspace<-("/home/sren/Documents/Master_thesis/Crappyfish/methylkit_19samples_10X_MN_210129.RData")
 load(methylkitworkspace)
 
+#Read chromosome information   
 refseq_to_ID<-read_tsv("ID_to_refseq.txt", col_names = c("ID","chr"))
 chr_length<-read_tsv("~/Documents/Master_thesis/annotation/GCF_000233375.1_ICSASG_v2_genomic_chrlength.txt", col_names = c("chr", "length")) %>%
   transmute(chr,cumsum=lag(c((cumsum(length))))) %>% mutate(cumsum = replace_na(cumsum, 0))
-
 
 rm(myDiff_MN)
 rm(meth.filtered)
@@ -24,6 +26,7 @@ myDiff_t<-myDiff_t %>% filter(qvalue<=0.01)
 
 threshold_for_sig<--log10(min(notsig$pvalue))
 
+#Prepare values for plotting
 SMP <- myDiff_t %>%
   left_join(.,chr_length, by="chr") %>%
   mutate(BPcum=start+cumsum) %>%
@@ -36,7 +39,7 @@ SMP <- myDiff_t %>%
   mutate(SMvalue=hypo*(-log10(pvalue))) %>%
   dplyr::mutate_if(.,is.character,stringr::str_replace_all, pattern = "NW_*.*", replacement = "Scaffolds")
 
-
+#Prepare DMRs  
 mydmr$DMR<-c(1:70)
 DMR<-subsetByOverlaps(as(myDiff_t,"GRanges"),mydmr) %>% as_tibble()
 SMP_DMR<-left_join(DMR, SMP, by=c("seqnames"="chr", "start"="start"))
@@ -49,12 +52,14 @@ mcols(gr1.matched) <- cbind.data.frame(
   mcols(mydmr[subjectHits(m)]))
 gr1.matched
 
-
+#Costumize x-axis 
 axisdf = SMP %>% group_by(chr) %>% summarize(center=(max(BPcum) + min(BPcum) ) / 2 ) %>% left_join(.,refseq_to_ID) %>% mutate(ID = replace_na(ID, "Scaffolds"))
 
+#Prepare text for interactive version
 SMP$text <-paste("Chromosome: ", SMP$chr, "\nPOSITION: ",SMP$start, "\nMeth.Diff: ", SMP$meth.diff)
 SMP_DMR$text <-paste("Chromosome: ", SMP_DMR$seqnames, "\nPOSITION: ",SMP_DMR$end.x, "\nMeth.Diff: ", SMP_DMR$meth.diff.x, "\nDMR:", gr1.matched$DMR)
 
+#Gather everything in one plot
 p<-ggplot(SMP, aes(x=BPcum, y=SMvalue, text = text)) +
   
   # Show all points

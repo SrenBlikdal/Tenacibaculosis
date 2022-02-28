@@ -5,7 +5,6 @@ library(tidyverse)
 library(qqman)
 library("QCEWAS")
 library(plotly)
-library(ggrepel)
 
 #Read EWAS data and DMR information 
 load("methylKit_small.RData")

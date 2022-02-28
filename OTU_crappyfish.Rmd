@@ -62,16 +62,50 @@ This is an R Markdown document. Markdown is a simple formatting syntax for autho
 
 When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
 
-```{r cars}
-summary(cars)
+```{r sick}
+OTU_MB %>%
+  filter(Health=="S")%>%
+  ggplot(.,aes(x= as.factor(ID),y=number,label=Health, fill=factor(OTU,levels = c("other","OTU1(Alivibrio)","OTU2(Mycoplasmataceae)")), width=0.7)) +
+  geom_bar(position="fill", stat="identity")+
+  scale_fill_manual("OTU", values = c("OTU1(Alivibrio)" = "orange2", "OTU2(Mycoplasmataceae)" = "skyblue2", "other" = "gray43"))+
+  xlab("Disease status")+
+  ylab("Relative aboundance")+
+  #scale_x_continuous(breaks=1:40, labels=c(OTU_MB$Health[1:40]))+
+  coord_flip()+
+  ggtitle("16S metabarcoding  \n N=40")+
+  theme(panel.background = element_blank(),
+        axis.ticks.x=element_blank(), 
+        axis.text.y.left =element_blank(),
+        axis.ticks.y=element_blank(), 
+        axis.text.x=element_blank(),
+        legend.position="bottom",
+        plot.title = element_text(hjust = 0.5),
+        axis.text.y = element_text(size = 8))
 ```
 
 ## Including Plots
 
 You can also embed plots, for example:
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+```{r pressure}
+OTU_MB %>%
+  filter(Health=="H")%>%
+  ggplot(.,aes(x= as.factor(ID),y=number,label=Health, fill=factor(OTU,levels = c("other","OTU1(Alivibrio)","OTU2(Mycoplasmataceae)")), width=0.7)) +
+  geom_bar(position="fill", stat="identity")+
+  scale_fill_manual("OTU", values = c("OTU1(Alivibrio)" = "orange2", "OTU2(Mycoplasmataceae)" = "skyblue2", "other" = "gray43"))+
+  xlab("Disease status")+
+  ylab("Relative aboundance")+
+  #scale_x_continuous(breaks=1:40, labels=c(OTU_MB$Health[1:40]))+
+  coord_flip()+
+  ggtitle("16S metabarcoding  \n N=40")+
+  theme(panel.background = element_blank(),
+        axis.ticks.x=element_blank(), 
+        axis.text.y.left =element_blank(),
+        axis.ticks.y=element_blank(), 
+        axis.text.x=element_blank(),
+        legend.position="bottom",
+        plot.title = element_text(hjust = 0.5),
+        axis.text.y = element_text(size = 8))
 ```
 
 Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.

@@ -46,7 +46,8 @@ myDiff_gr<-(as(myDiff_t,"GRanges"))
 ol <- findOverlaps(gr1,mydmr)
 myDiff_DMR <- myDiff_gr[queryHits(ol)]
 mcols(myDiff_DMR) <- cbind.data.frame(mcols(myDiff_gr.ol),mcols(mydmr[subjectHits(ol)]))
-myDiff_DMR_t<-as_tibble(myDiff_DMR)
+myDiff_DMR_t<-as_tibble(myDiff_DMR) %>% select(seqnames, start, DMR) %>% left_join(.,SMP, by=c("seqnames"="chr", "start"="start"))
+DMR_annotation<-myDiff_DMR_t %>% group_by(DMR) %>% summarize(pvalue=min(pvalue)) %>% ungroup(.) %>% left_join(.,myDiff_DMR_t, by=c("DMR"="DMR","pvalue"="pvalue"))%>%select(DMR,BPcum,SMvalue) %>% mutate(ypos= ifelse((SMvalue<0),(SMvalue-6),SMvalue+6))
 
 #Costumize x-axis 
 axisdf = SMP %>% group_by(chr) %>% summarize(center=(max(BPcum) + min(BPcum) ) / 2 ) %>% left_join(.,refseq_to_ID) %>% mutate(ID = replace_na(ID, "Scaffolds"))
@@ -63,7 +64,8 @@ p<-ggplot(SMP, aes(x=BPcum, y=SMvalue, text = text)) +
   scale_color_manual(values = rep(c("orange", "black"),600)) +
   annotate(geom = "text",label=axisdf$ID, x=axisdf$center, y=rep(c(2,0,-2),10), angle=90)+
   geom_point(data= myDiff_DMR_t,aes(x=BPcum,y=SMvalue,color=as.factor(seqnames)),size=1.2,alpha=1) +
-  #geom_label_repel(myDiff_DMR,aes(label=DMR))+
+  annotate(geom = "text",label=DMR_annotation$DMR, x=DMR_annotation$BPcum, y=DMR_annotation$ypos)+
+  #geom_label_repel(myDiff_DMR_t, mapping = aes(x=BPcum, y =SMvalue, label=DMR))+
   
   # custom X axis:
   scale_y_continuous(labels = c(30,20,10,0,10,20,30), breaks = c(-30,-20,-10,0,10,20,30), position = "right") +

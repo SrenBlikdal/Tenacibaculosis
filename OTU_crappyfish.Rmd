@@ -1,0 +1,77 @@
+---
+title: "OTU_crappyfish_barchart"
+author: "Søren Blikdal Hansen"
+date: "8/23/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+OTU<-read_csv("~/Documents/Master_thesis/Crappyfish/Crappyfish_OTU.csv")
+```
+
+```{r}
+OTU_MB<- OTU %>% filter(Tissue== "M", Time== "B") %>% 
+  rowid_to_column(., "EpiID") %>%
+  arrange((`OTU2(Mycoplasmataceae)`)) %>% 
+  rowid_to_column(., "ID") %>%
+  mutate(other=10000-(`OTU1(Alivibrio)`+`OTU2(Mycoplasmataceae)`)) %>% 
+  dplyr::select(.,EpiID,ID,Health, `OTU1(Alivibrio)`, `OTU2(Mycoplasmataceae)`,other) %>%
+  gather(key="OTU", value="number", `OTU1(Alivibrio)`, `OTU2(Mycoplasmataceae)`,other)
+```
+
+```{r}
+ggplot(OTU_MB,aes(x=ID,y=number,label=Health, fill=factor(OTU,levels = c("other","OTU1(Alivibrio)","OTU2(Mycoplasmataceae)")), width=0.7)) +
+  geom_bar(position="fill", stat="identity")+
+  scale_fill_manual("OTU", values = c("OTU1(Alivibrio)" = "orange2", "OTU2(Mycoplasmataceae)" = "skyblue2", "other" = "gray43"))+
+  xlab("Disease status")+
+  ylab("Relative aboundance")+
+  scale_x_continuous(breaks=1:40, labels=c(OTU_MB$Health[1:40]))+
+  ggtitle("16S metabarcoding  \n N=40")+
+  theme_bw(base_size=14)+
+  theme(panel.background = element_blank(),
+        legend.position="bottom",
+        plot.title = element_text(hjust = 0.5),
+        axis.text.y = element_text(size = 14))
+```
+```{r}
+OTU_MB %>%
+  #filter(EpiID<=20)%>%
+  ggplot(.,aes(x=ID,y=number,label=Health, fill=factor(OTU,levels = c("other","OTU1(Alivibrio)","OTU2(Mycoplasmataceae)")), width=0.7)) +
+  geom_bar(position="fill", stat="identity")+
+  scale_fill_manual("OTU", values = c("OTU1(Alivibrio)" = "orange2", "OTU2(Mycoplasmataceae)" = "skyblue2", "other" = "gray43"))+
+  xlab("Disease status")+
+  ylab("Relative aboundance")+
+  scale_x_continuous(breaks=1:40, labels=c(OTU_MB$Health[1:40]))+
+  coord_flip()+
+  ggtitle("16S metabarcoding  \n N=40")+
+  theme(panel.background = element_blank(),
+        axis.ticks.x=element_blank(), 
+        axis.text.x=element_blank(),
+        legend.position="bottom",
+        plot.title = element_text(hjust = 0.5),
+        axis.text.y = element_text(size = 8))
+```
+
+
+
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.

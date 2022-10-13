@@ -10,7 +10,7 @@ library(methylKit)
 library(edmr)
 #edmr_0.6.4.1
 
-setwd("/home/projects/ku-cbd/data/HoloFish/morten_fish/Epigenome/Novogene_CrappyFish_20samples_24Sep20_Analyses/5.1_bismark")
+setwd("/projects/mjolnir1/people/vrt191/Crappyfish_cov_files")
 
 file.list<-list(
 "D1.pair1.truncated.gz_bismark_bt2_pe.multiple.deduplicated.bismark.cov.gz",
@@ -51,7 +51,7 @@ rm(my_obj)
 rm(filtered.my_obj)
 
 #Save workspace
-save.image(file ="/home/projects/ku-cbd/data/HoloFish/morten_fish/Epigenome/Novogene_CrappyFish_20samples_24Sep20_Analyses/MethylKit_19samples.RData")
+save.image(file ="/projects/mjolnir1/people/vrt191/Crappyfish_cov_files/MethylKit_19samples.RData")
 
 q()
 n

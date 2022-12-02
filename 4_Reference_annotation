@@ -70,4 +70,36 @@ bedtools subtract -a GCF_000233375.1_ICSASG_v2_genomic_gene.bed -b GCF_000233375
 #Make file with all promoters+GB2500+GE2500+GB
 cat *merged.bed | bedtools sort | bedtools merge > GCF_000233375.1_ICSASG_v2_genomic_promoter+2500GB+2500GE+GB_merged.bed
 
+#Make file with all intergenic regions
 bedtools complement -i GCF_000233375.1_ICSASG_v2_genomic_promoter+2500GB+2500GE+GB_merged.bed -g GCF_000233375.1_ICSASG_v2_genomic_chrlength_sorted.txt | bedtools sort | bedtools merge> GCF_000233375.1_ICSASG_v2_genomic_intergenic_merged.bed 
+
+### Make overlaping features 
+
+#Make file with proximal promoters (250 promoters)
+bedtools flank -i GCF_000233375.1_ICSASG_v2_genomic_gene.bed -g GCF_000233375.1_ICSASG_v2_genomic_chrlength.txt -l 250 -r 0 -s | bedtools sort > GCF_000233375.1_ICSASG_v2_genomic_250promoter.bed
+
+#Make file with medial promoters (750 promoters)
+bedtools flank -i GCF_000233375.1_ICSASG_v2_genomic_250promoter.bed -g GCF_000233375.1_ICSASG_v2_genomic_chrlength.txt -l 750 -r 0 -s | bedtools sort > GCF_000233375.1_ICSASG_v2_genomic_750promoter.bed  
+
+#Make file with distal promoters (5000 promoters)
+bedtools flank -i GCF_000233375.1_ICSASG_v2_genomic_750promoter.bed -g GCF_000233375.1_ICSASG_v2_genomic_chrlength.txt -l 5000 -r 0 -s | bedtools sort > GCF_000233375.1_ICSASG_v2_genomic_5000promoter.bed
+
+#Make file with first 2500 bp after TSS
+bedtools flank -i GCF_000233375.1_ICSASG_v2_genomic_gene.bed -g GCF_000233375.1_ICSASG_v2_genomic_chrlength.txt -l 2 -r 0 -s | bedtools flank -i stdin -g GCF_000233375.1_ICSASG_v2_genomic_chrlength.txt -l 0 -r 2500 -s | bedtools intersect -a stdin -b GCF_000233375.1_ICSASG_v2_genomic_gene.bed -wa | bedtools sort > GCF_000233375.1_ICSASG_v2_genomic_2500GB.bed 
+
+#Make file with last 2500 bp before TTS
+bedtools flank -i GCF_000233375.1_ICSASG_v2_genomic_gene.bed -g GCF_000233375.1_ICSASG_v2_genomic_chrlength.txt -l 0 -r 2 -s | bedtools flank -i stdin -g GCF_000233375.1_ICSASG_v2_genomic_chrlength.txt -l 2500 -r 0 -s | bedtools intersect -a stdin -b GCF_000233375.1_ICSASG_v2_genomic_gene.bed -wa | bedtools sort > GCF_000233375.1_ICSASG_v2_genomic_2500GE.bed 
+
+#Make file with all promoters+GB2500+GE2500
+cat GCF_000233375.1_ICSASG_v2_genomic_2500GB.bed GCF_000233375.1_ICSASG_v2_genomic_2500GE.bed | bedtools sort | bedtools merge > GCF_000233375.1_ICSASG_v2_genomic_2500GB+2500GE_merged.bed
+
+#Make GFF of gene bodies
+bedtools subtract -a GCF_000233375.1_ICSASG_v2_genomic_gene.bed -b GCF_000233375.1_ICSASG_v2_genomic_2500GB+2500GE_merged.bed | bedtools sort | bedtools merge > GCF_000233375.1_ICSASG_v2_genomic_GB_merged.bed
+
+#Make file with all promoters+GB2500+GE2500+GB
+cat GCF_000233375.1_ICSASG_v2_genomic_GB_merged.bed GCF_000233375.1_ICSASG_v2_genomic_2500GB.bed GCF_000233375.1_ICSASG_v2_genomic_2500GE.bed GCF_000233375.1_ICSASG_v2_genomic_5000promoter.bed GCF_000233375.1_ICSASG_v2_genomic_750promoter.bed GCF_000233375.1_ICSASG_v2_genomic_250promoter.bed| bedtools sort | bedtools merge > GCF_000233375.1_ICSASG_v2_genomic_promoter+2500GB+2500GE+GB_merged.bed
+
+#Make file with all intergenic regions
+bedtools complement -i GCF_000233375.1_ICSASG_v2_genomic_promoter+2500GB+2500GE+GB_merged.bed -g GCF_000233375.1_ICSASG_v2_genomic_chrlength_sorted.txt | bedtools sort | bedtools merge> GCF_000233375.1_ICSASG_v2_genomic_intergenic_merged.bed 
+
+

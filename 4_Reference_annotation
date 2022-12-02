@@ -90,16 +90,12 @@ bedtools flank -i GCF_000233375.1_ICSASG_v2_genomic_gene.bed -g GCF_000233375.1_
 #Make file with last 2500 bp before TTS
 bedtools flank -i GCF_000233375.1_ICSASG_v2_genomic_gene.bed -g GCF_000233375.1_ICSASG_v2_genomic_chrlength.txt -l 0 -r 2 -s | bedtools flank -i stdin -g GCF_000233375.1_ICSASG_v2_genomic_chrlength.txt -l 2500 -r 0 -s | bedtools intersect -a stdin -b GCF_000233375.1_ICSASG_v2_genomic_gene.bed -wa | bedtools sort > GCF_000233375.1_ICSASG_v2_genomic_2500GE.bed 
 
-#Make file with all promoters+GB2500+GE2500
-cat GCF_000233375.1_ICSASG_v2_genomic_2500GB.bed GCF_000233375.1_ICSASG_v2_genomic_2500GE.bed | bedtools sort | bedtools merge > GCF_000233375.1_ICSASG_v2_genomic_2500GB+2500GE_merged.bed
-
 #Make GFF of gene bodies
-bedtools subtract -a GCF_000233375.1_ICSASG_v2_genomic_gene.bed -b GCF_000233375.1_ICSASG_v2_genomic_2500GB+2500GE_merged.bed | bedtools sort | bedtools merge > GCF_000233375.1_ICSASG_v2_genomic_GB_merged.bed
-
-#Make file with all promoters+GB2500+GE2500+GB
-cat GCF_000233375.1_ICSASG_v2_genomic_GB_merged.bed GCF_000233375.1_ICSASG_v2_genomic_2500GB.bed GCF_000233375.1_ICSASG_v2_genomic_2500GE.bed GCF_000233375.1_ICSASG_v2_genomic_5000promoter.bed GCF_000233375.1_ICSASG_v2_genomic_750promoter.bed GCF_000233375.1_ICSASG_v2_genomic_250promoter.bed| bedtools sort | bedtools merge > GCF_000233375.1_ICSASG_v2_genomic_promoter+2500GB+2500GE+GB_merged.bed
+bedtools subtract -a GCF_000233375.1_ICSASG_v2_genomic_gene.bed -b GCF_000233375.1_ICSASG_v2_genomic_2500GB.bed | bedtools subtract -a stdin -b GCF_000233375.1_ICSASG_v2_genomic_2500GE.bed | bedtools sort > GCF_000233375.1_ICSASG_v2_genomic_GB.bed
 
 #Make file with all intergenic regions
 bedtools complement -i GCF_000233375.1_ICSASG_v2_genomic_promoter+2500GB+2500GE+GB_merged.bed -g GCF_000233375.1_ICSASG_v2_genomic_chrlength_sorted.txt | bedtools sort | bedtools merge> GCF_000233375.1_ICSASG_v2_genomic_intergenic_merged.bed 
 
+for feature in GCF_000233375.1_ICSASG_v2_genomic_250promoter.bed GCF_000233375.1_ICSASG_v2_genomic_750promoter.bed GCF_000233375.1_ICSASG_v2_genomic_5000promoter.bed GCF_000233375.1_ICSASG_v2_genomic_2500GB.bed  GCF_000233375.1_ICSASG_v2_genomic_2500GE.bed GCF_000233375.1_ICSASG_v2_genomic_GB.bed ; do  bedtools intersect -a dmrs.bed -b $feature -wb | awk -v i="$feature" '{print $10, i}' |cut -c 6- >> genes_X_DMR.txt ; done
 
+for feature in GCF_000233375.1_ICSASG_v2_genomic_250promoter.bed GCF_000233375.1_ICSASG_v2_genomic_750promoter.bed GCF_000233375.1_ICSASG_v2_genomic_5000promoter.bed GCF_000233375.1_ICSASG_v2_genomic_2500GB.bed  GCF_000233375.1_ICSASG_v2_genomic_2500GE.bed GCF_000233375.1_ICSASG_v2_genomic_GB.bed ; do  bedtools intersect -a dmrs.bed -b $feature -wa | awk -v i="$feature" '{print $0, i}' >> DMR_X_genes.txt ; done

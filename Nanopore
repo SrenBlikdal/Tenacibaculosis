@@ -1,0 +1,65 @@
+module load anaconda3
+module load samtools/1.9
+module load minimap2/2.6
+conda activate /projects/mjolnir1/apps/conda/nanopolish-0.13.2
+
+cd /projects/mjolnir1/people/vrt191/Crappyfish/nanopore
+Reference=/projects/mjolnir1/people/vrt191/srenhan/Salmon_REF_Genome/GCF_000233375.1_ICSASG_v2_genomic.fa
+
+i=D15
+cd $i
+
+tar -xvf "$i"_pass.tar.gz
+tar -xvf "$i"_fast5.tar.gz 
+cat pass/*.fastq > "$i".fastq
+
+nanopolish index -d fast5/ "$i".fastq
+
+minimap2 -a -t 10 -x map-ont $Reference $i.fastq | samtools sort -@ 9 -T tmp -o $i.sorted.bam
+
+samtools index $i.sorted.bam
+
+##ROI1
+nanopolish call-methylation -t 10 -r $i.fastq -b $i.sorted.bam -g $Reference -w "NC_027312.1:39,651,935-39,661,977" > methylation_calls_ROI1.tsv
+##ROI2
+nanopolish call-methylation -t 10 -r $i.fastq -b $i.sorted.bam -g $Reference -w "NC_027311.1:58,028,040-58,038,276" > methylation_calls_ROI2.tsv
+##ROI3
+nanopolish call-methylation -t 10 -r $i.fastq -b $i.sorted.bam -g $Reference -w "NC_027302.1:36,337,465-36,346,562" > methylation_calls_ROI3.tsv
+##ROI4
+nanopolish call-methylation -t 10 -r $i.fastq -b $i.sorted.bam -g $Reference -w "NC_027305.1:35,743,727-35,753,253" > methylation_calls_ROI4.tsv
+##ROI5
+nanopolish call-methylation -t 10 -r $i.fastq -b $i.sorted.bam -g $Reference -w "NC_027312.1:17,753,985-17,764,258" > methylation_calls_ROI5.tsv
+##ROI6
+nanopolish call-methylation -t 10 -r $i.fastq -b $i.sorted.bam -g $Reference -w "NC_027313.1:61,014,780-61,028,987" > methylation_calls_ROI6.tsv
+##ROI7
+nanopolish call-methylation -t 10 -r $i.fastq -b $i.sorted.bam -g $Reference -w "NC_027318.1:25,841,898-25,856,562" > methylation_calls_ROI7.tsv
+##ROI8
+nanopolish call-methylation -t 10 -r $i.fastq -b $i.sorted.bam -g $Reference -w "NC_027302.1:50,233,895-50,243,301" > methylation_calls_ROI8.tsv
+##ROI9
+nanopolish call-methylation -t 10 -r $i.fastq -b $i.sorted.bam -g $Reference -w "NC_027303.1:15,211,634-15,222,313" > methylation_calls_ROI9.tsv
+##ROI10
+nanopolish call-methylation -t 10 -r $i.fastq -b $i.sorted.bam -g $Reference -w "NC_027310.1:26,101,625-26,112,398" > methylation_calls_ROI10.tsv
+
+## The coordinates of ONT and WGBS are not alligned, therefore the coordinates from the +strand needs to be +1 and the coordinates from the - strand +2
+for ROI in ROI1 ROI2 ROI3 ROI4 ROI5 ROI6 ROI7 ROI8 ROI9 ROI10
+do 
+awk -F"\t" '$2 == "strand" || $2 == "+" { print $0 }' methylation_calls_$ROI.tsv > methylation_calls_plus_$ROI.tsv
+done 
+
+for ROI in ROI1 ROI2 ROI3 ROI4 ROI5 ROI6 ROI7 ROI8 ROI9 ROI10
+do 
+awk -F"\t" '$2 == "strand" || $2 == "-" { print $0 }' methylation_calls_$ROI.tsv > methylation_calls_minus_$ROI.tsv
+done 
+
+for ROI in ROI1 ROI2 ROI3 ROI4 ROI5 ROI6 ROI7 ROI8 ROI9 ROI10
+do 
+../calculate_methylation_frequency.py methylation_calls_plus_$ROI.tsv | awk -F"\t" '{ print $0"\t"$2+1}' > methylation_frequency_plus_$ROI.tsv
+done 
+
+for ROI in ROI1 ROI2 ROI3 ROI4 ROI5 ROI6 ROI7 ROI8 ROI9 ROI10
+do 
+../calculate_methylation_frequency.py methylation_calls_minus_$ROI.tsv | awk -F"\t" '{ print $0"\t"$2+2}' > methylation_frequency_minus_$ROI.tsv
+done 
+
+cat methylation_frequency_* | awk -F"\t" ' $4 == "1" { print $0 }' > "$i"_methylation_frequency.tsv
+

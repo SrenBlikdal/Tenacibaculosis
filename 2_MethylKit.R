@@ -10,7 +10,7 @@ library(methylKit)
 library(edmr)
 #edmr_0.6.4.1
 
-setwd("/projects/mjolnir1/people/vrt191/Crappyfish_cov_files")
+setwd("{Dir_with_bismark_cov_files}")
 
 file.list<-list(
 "D1.pair1.truncated.gz_bismark_bt2_pe.multiple.deduplicated.bismark.cov.gz",

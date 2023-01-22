@@ -51,7 +51,7 @@ rm(my_obj)
 rm(filtered.my_obj)
 
 #Save workspace
-save.image(file ="/projects/mjolnir1/people/vrt191/Crappyfish_cov_files/MethylKit_19samples.RData")
+save.image(file ="{outputdir/MethylKit_19samples.RData}")
 
 q()
 n

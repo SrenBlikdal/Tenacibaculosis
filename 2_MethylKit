@@ -51,7 +51,7 @@ rm(my_obj)
 rm(filtered.my_obj)
 
 #Save workspace
-save.image(file ="/home/projects/ku-cbd/data/HoloFish/morten_fish/Epigenome/Novogene_CrappyFish_20samples_24Sep20_Analyses/MethylKit_19samples.RData")
+save.image(file ="{outputdir/MethylKit_19samples.RData}")
 
 q()
 n

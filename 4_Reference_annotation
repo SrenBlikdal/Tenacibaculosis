@@ -16,6 +16,7 @@ cut -f1,2 GCF_000233375.1_ICSASG_v2_genomic.fna.fai > GCF_000233375.1_ICSASG_v2_
 source ~/.bashrc
 conda activate /projects/mjolnir1/apps/conda/bedops-2.4.39/
 
+##input files for Figure 2A 
 ##All 79000 genes 
 
 #Make file with only genes 
@@ -38,6 +39,7 @@ do awk -F"\t" '$2 < $3 { print $0 }' GCF_000233375.1_ICSASG_v2_genomic_79000_$((
 bedtools flank -i stdin -g GCF_000233375.1_ICSASG_v2_genomic_chrlength.txt -l -0 -r 50 -s > GCF_000233375.1_ICSASG_v2_genomic_79000_$((i+50))promoter.bed
 done
 
+###inputfiles for Table 2
 ### Make Nonoverlaping features 
 
 #Make file with proximal promoters (250 promoters)

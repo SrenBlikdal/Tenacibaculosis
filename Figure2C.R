@@ -1,11 +1,10 @@
-###Figure 1C
+###Figure 2C
 
 library(tidyverse)
 library(methylKit)
 
-load("methylKit_small.RData")
+load("{your_path}/MethylKit_19samples.RData")
 
-#Figure 1.2: 
 c <- clusterSamples(meth.filtered, dist="euclidean", filterByQuantile =T, sd.threshold =0.75, method="ward", plot=F)
 
 # Function to change color of the labels
@@ -16,14 +15,12 @@ colLab <- function(n) {
   if (is.leaf(n)) {
     a <- attributes(n)
     labCol <- labelColors[clusMember[which(names(clusMember) == a$label)]]
-    attr(n, "nodePar") <- c(a$nodePar, lab.col = labCol)
+    attr(n, "nodePar") <- c(a$nodePar, list(lab.col = labCol, col=labCol, pch = 19,cex=1.5))
   }
   n
 }
 # using dendrapply
 clusDendro = dendrapply(as.dendrogram(c), colLab)
-clusDendro = dendrapply(as.dendrogram(c), colLab) %>% set("leaves_pch", 19) %>% set("leaves_col",c("red","red","blue","red","red","blue","red","blue","red","red","red","red","red","blue","blue","blue","blue","blue","blue"))
 
-png("/home/projects/ku-cbd/data/HoloFish/morten_fish/Epigenome/Novogene_CrappyFish_20samples_24Sep20_Analyses/Clustering.png", width = 300, height = 300, units='mm', res = 300)
 plot(clusDendro, main = "Hierarchical Clustering", ylab = "Euclidean distance")
-dev.off()
+

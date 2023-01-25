@@ -43,7 +43,7 @@ meth.filtered<-unite(filtered.my_obj, destrand=F)
 
 myDiff<-calculateDiffMeth(meth.filtered, mc.cores=40)
 
-mydmr<-edmr(myDiff, dist=150,DMC.methdiff = 0, num.DMCs = 10)
+mydmr<-edmr(myDiff, dist=150,DMC.methdiff = 0, num.DMCs = 8)
 
 #Remove intermediate files 
 

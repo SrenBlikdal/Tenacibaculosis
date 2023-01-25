@@ -39,7 +39,7 @@ do awk -F"\t" '$2 < $3 { print $0 }' GCF_000233375.1_ICSASG_v2_genomic_79000_$((
 bedtools flank -i stdin -g GCF_000233375.1_ICSASG_v2_genomic_chrlength.txt -l -0 -r 50 -s > GCF_000233375.1_ICSASG_v2_genomic_79000_$((i+50))promoter.bed
 done
 
-###inputfiles for Table 2
+### Inputfiles for Table 2 (DMC analysis)
 ### Make Nonoverlaping features 
 
 #Make file with proximal promoters (250 promoters)
@@ -75,6 +75,7 @@ cat *merged.bed | bedtools sort | bedtools merge > GCF_000233375.1_ICSASG_v2_gen
 #Make file with all intergenic regions
 bedtools complement -i GCF_000233375.1_ICSASG_v2_genomic_promoter+2500GB+2500GE+GB_merged.bed -g GCF_000233375.1_ICSASG_v2_genomic_chrlength_sorted.txt | bedtools sort | bedtools merge> GCF_000233375.1_ICSASG_v2_genomic_intergenic_merged.bed 
 
+### Inputfiles for table 2 and supplementary 4 (DMR analysis)
 ### Make overlaping features 
 
 #Make file with proximal promoters (250 promoters)

@@ -1,9 +1,10 @@
-###Figure 1B
+##Download data from https://github.com/DavideBozzi/Bozzi_et_al_2020_analysis/tree/master/R%20_analysis%20-%20Input%20Files
+#Figure 1B
 library(tidyverse)
 install.packages("stringr")
 library(stringr)
 
-d<-read_csv("~/Documents/Crappyfish/Dead_fish.csv") %>% 
+d<-read_csv("{your_dir}/Dead_fish.csv") %>% 
   dplyr::select(-Tank) %>% 
   mutate(day_num=as.numeric(str_sub(Day,-2))) 
 

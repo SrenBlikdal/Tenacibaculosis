@@ -16,7 +16,7 @@ inputnames<-c(seq(-6000, -50, by = 50),seq(50, 4000, by= 50))
 
 headder<-c("chrom","chromStart","chromEnd","name", "score", "strand")
 
-#GCF_000233375.1_ICSASG_v2_genomic_79000_",x,"promoter.bed are created with script 
+#GCF_000233375.1_ICSASG_v2_genomic_79000_",x,"promoter.bed are created with script "Reference_annotation"
 H<-inputnames %>% map(function(x) read_tsv(paste0("~{your_path}/Figure1A/GCF_000233375.1_ICSASG_v2_genomic_79000_",x,"promoter.bed"), col_names = headder) %>% as(.,"GRanges") %>% subsetByOverlaps(mean.meth_H_GR,.) %>% as_tibble() %>% transmute(mean=mean.meth, pos=x))
 S<-inputnames %>% map(function(x) read_tsv(paste0("~{your_path}/Figure1A/GCF_000233375.1_ICSASG_v2_genomic_79000_",x,"promoter.bed"), col_names = headder) %>% as(.,"GRanges") %>% subsetByOverlaps(mean.meth_S_GR,.) %>% as_tibble() %>% transmute(mean=mean.meth, pos=x))
 

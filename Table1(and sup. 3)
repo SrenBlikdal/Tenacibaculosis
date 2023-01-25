@@ -1,0 +1,296 @@
+###
+library(tidyverse)
+library(methylKit)
+library(RColorBrewer)
+
+load("~/Documents/Crappyfish/MethylKit_19samples.RData")
+
+colnames<-c("chr","start_not_adj","end", "num_motifs_in_group",	"called_sites",	"called_sites_methylated",	"methylated_frequency",	"group_sequence","start")
+D1_ONT<-read_tsv("~/Documents/Crappyfish/D1_methylation_frequency.tsv", col_names =colnames)
+D4_ONT<-read_tsv("~/Documents/Crappyfish/D4_methylation_frequency.tsv", col_names =colnames)
+D9_ONT<-read_tsv("~/Documents/Crappyfish/D9_methylation_frequency.tsv", col_names =colnames)
+D15_ONT<-read_tsv("~/Documents/Crappyfish/D15_methylation_frequency.tsv", col_names =colnames)
+
+D1_ONT_5X<-D1_ONT %>% filter(called_sites>=5) %>%
+  mutate(type="ONT",PercM=methylated_frequency*100) %>% 
+  dplyr::select(chr,start,PercM,type)
+
+D4_ONT_5X<-D4_ONT %>% filter(called_sites>=5) %>%
+  mutate(type="ONT",PercM=methylated_frequency*100) %>% 
+  dplyr::select(chr,start,PercM,type)
+
+D9_ONT_5X<-D9_ONT %>% filter(called_sites>=5) %>%
+  mutate(type="ONT",PercM=methylated_frequency*100) %>% 
+  dplyr::select(chr,start,PercM,type)
+
+D15_ONT_5X<-D15_ONT %>% filter(called_sites>=5) %>%
+  mutate(type="ONT",PercM=methylated_frequency*100) %>% 
+  dplyr::select(chr,start,PercM,type)
+
+#ROI1 (DMR56)
+###5X
+ROI1_cov<-as_tibble(meth.filtered) %>%
+  rowid_to_column(.) %>%
+  #filter(chr=="NC_027312.1" & start >=39651935 & start <=39661977)
+  filter(chr=="NC_027312.1" & start >=39660870 & start <=39661411)
+
+ROI1_mc<-methylKit::select(meth.filtered,min(ROI1_cov$rowid):max(ROI1_cov$rowid)) %>%
+  percMethylation(.) %>% 
+  as_tibble(.) %>%
+  bind_cols(chr=ROI1_cov$chr,start=ROI1_cov$start,.)
+
+#ROI2 (DMR49)
+###5X
+ROI2_cov<-as_tibble(meth.filtered) %>%
+  rowid_to_column(.) %>%
+  #filter(chr=="NC_027311.1" & start >=58028040 & start <=58038276)
+  filter(chr=="NC_027311.1" & start >=58032346 & start <=58032845)
+
+ROI2_mc<-methylKit::select(meth.filtered,min(ROI2_cov$rowid):max(ROI2_cov$rowid)) %>%
+  percMethylation(.) %>% 
+  as_tibble(.) %>%
+  bind_cols(chr=ROI2_cov$chr,start=ROI2_cov$start,.)
+
+#ROI3 (DMR10)
+###5X
+ROI3_cov<-as_tibble(meth.filtered) %>%
+  rowid_to_column(.) %>%
+  #filter(chr=="NC_027302.1" & start >=36337465 & start <=36346562)
+  filter(chr=="NC_027302.1" & start >=36342027 & start <=36343764)
+
+ROI3_mc<-methylKit::select(meth.filtered,min(ROI3_cov$rowid):max(ROI3_cov$rowid)) %>%
+  percMethylation(.) %>% 
+  as_tibble(.) %>%
+  bind_cols(chr=ROI3_cov$chr,start=ROI3_cov$start,.)
+
+#ROI4 (DMR20)
+###5X
+ROI4_cov<-as_tibble(meth.filtered) %>%
+  rowid_to_column(.) %>%
+  #filter(chr=="NC_027305.1" & start >=35743727 & start <=35753253)
+  filter(chr=="NC_027305.1" & start >=35745188 & start <=35747550)
+
+
+ROI4_mc<-methylKit::select(meth.filtered,min(ROI4_cov$rowid):max(ROI4_cov$rowid)) %>%
+  percMethylation(.) %>% 
+  as_tibble(.) %>%
+  bind_cols(chr=ROI4_cov$chr,start=ROI4_cov$start,.)
+
+#ROI5 (DMR53)
+###5X
+ROI5_cov<-as_tibble(meth.filtered) %>%
+  rowid_to_column(.) %>%
+  #filter(chr=="NC_027312.1" & start >=17753985 & start <=17764258)
+  filter(chr=="NC_027312.1" & start >=17758872 & start <=17759479)
+  
+ROI5_mc<-methylKit::select(meth.filtered,min(ROI5_cov$rowid):max(ROI5_cov$rowid)) %>%
+  percMethylation(.) %>% 
+  as_tibble(.) %>%
+  bind_cols(chr=ROI5_cov$chr,start=ROI5_cov$start,.)
+
+#ROI6 (DMR63)
+###5X
+ROI6_cov<-as_tibble(meth.filtered) %>%
+  rowid_to_column(.) %>%
+  #filter(chr=="NC_027313.1" & start >=61014780 & start <=61028987)
+  filter(chr=="NC_027313.1" & start >=61015155 & start <=61015635)
+
+ROI6_mc<-methylKit::select(meth.filtered,min(ROI6_cov$rowid):max(ROI6_cov$rowid)) %>%
+  percMethylation(.) %>% 
+  as_tibble(.) %>%
+  bind_cols(chr=ROI6_cov$chr,start=ROI6_cov$start,.)
+
+#ROI7.1 (DMR 70)
+###5X
+ROI7.1_cov<-as_tibble(meth.filtered) %>%
+  rowid_to_column(.) %>%
+  #filter(chr=="NC_027318.1" & start >=25841898 & start <=25856562)
+  filter(chr=="NC_027318.1" & start >=25844692 & start <=25845539)
+
+ROI7.1_mc<-methylKit::select(meth.filtered,min(ROI7.1_cov$rowid):max(ROI7.1_cov$rowid)) %>%
+  percMethylation(.) %>% 
+  as_tibble(.) %>%
+  bind_cols(chr=ROI7.1_cov$chr,start=ROI7.1_cov$start,.)
+
+#ROI7.2 (DMR 71)
+###5X
+ROI7.2_cov<-as_tibble(meth.filtered) %>%
+  rowid_to_column(.) %>%
+  #filter(chr=="NC_027318.1" & start >=25841898 & start <=25856562)
+  filter(chr=="NC_027318.1" & start >=25846482 & start <=25847056)
+
+ROI7.2_mc<-methylKit::select(meth.filtered,min(ROI7.2_cov$rowid):max(ROI7.2_cov$rowid)) %>%
+  percMethylation(.) %>% 
+  as_tibble(.) %>%
+  bind_cols(chr=ROI7.2_cov$chr,start=ROI7.2_cov$start,.)
+
+#ROI8 (DMR11)
+###5X
+ROI8_cov<-as_tibble(meth.filtered) %>%
+  rowid_to_column(.) %>%
+  #filter(chr=="NC_027302.1" & start >=50233895 & start <=50243301)
+  filter(chr=="NC_027302.1" & start >=50237537 & start <=50239338)
+
+ROI8_mc<-methylKit::select(meth.filtered,min(ROI8_cov$rowid):max(ROI8_cov$rowid)) %>%
+  percMethylation(.) %>% 
+  as_tibble(.) %>%
+  bind_cols(chr=ROI8_cov$chr,start=ROI8_cov$start,.)
+
+#ROI9 (DMR15)
+###5X
+ROI9_cov<-as_tibble(meth.filtered) %>%
+  rowid_to_column(.) %>%
+  #filter(chr=="NC_027303.1" & start >=15211634 & start <=15222313)
+  filter(chr=="NC_027303.1" & start >=15219361 & start <=15219935)
+
+ROI9_mc<-methylKit::select(meth.filtered,min(ROI9_cov$rowid):max(ROI9_cov$rowid)) %>%
+  percMethylation(.) %>% 
+  as_tibble(.) %>%
+  bind_cols(chr=ROI9_cov$chr,start=ROI9_cov$start,.)
+
+#ROI10 (DMR37)
+###5X
+ROI10_cov<-as_tibble(meth.filtered) %>%
+  rowid_to_column(.) %>%
+  #filter(chr=="NC_027310.1" & start >=26101625 & start <=26112398)
+  filter(chr=="NC_027310.1" & start >=26104901 & start <=26105261)
+
+ROI10_mc<-methylKit::select(meth.filtered,min(ROI10_cov$rowid):max(ROI10_cov$rowid)) %>%
+  percMethylation(.) %>% 
+  as_tibble(.) %>%
+  bind_cols(chr=ROI10_cov$chr,start=ROI10_cov$start,.)
+
+ROI_mc_list <- c("ROI1_mc", "ROI2_mc", "ROI3_mc", "ROI4_mc", "ROI5_mc", "ROI6_mc", "ROI7.1_mc", "ROI7.2_mc", "ROI8_mc", "ROI9_mc", "ROI10_mc")
+ROI_cov_list <- c("ROI1_cov", "ROI2_cov", "ROI3_cov", "ROI4_cov", "ROI5_cov", "ROI6_cov", "ROI7.1_cov", "ROI7.2_cov", "ROI8_cov", "ROI9_cov", "ROI10_cov")
+
+#sample D1
+calculate_difference <- function(mc,cov) {
+  comp <- mc %>% 
+    dplyr::select(chr,start,D1) %>% 
+    mutate(type="WGBS") %>% 
+    dplyr::rename(PercM=D1) %>%
+    bind_cols(.,cov=cov$coverage1) %>% 
+    filter(cov >= 5) %>% 
+    dplyr::select(-cov) %>%
+    bind_rows(.,D1_ONT_5X) %>%
+    group_by(start) %>%
+    filter(n()>1) %>%
+    spread(type,PercM)
+  
+  result <- tibble(sd = round(sd(comp$ONT - comp$WGBS),0),
+                 n = length(comp$ONT - comp$WGBS),
+                 mean_WGBS = round(mean(comp$WGBS),0),
+                 mean_ONT = round(mean(comp$ONT),0))
+  return(result)
+}
+
+tibble_list <- list()
+
+for(i in 1:length(ROI_mc_list)){
+  tibble_list[[i]]<-calculate_difference(get(ROI_mc_list[i]),get(ROI_cov_list[i]))
+}
+
+table1_D1 <- bind_rows(tibble_list) %>% bind_cols(ROI=ROI_mc_list,.)
+
+#sample D9
+calculate_difference <- function(mc,cov) {
+  comp <- mc %>% 
+    dplyr::select(chr,start,D9) %>% 
+    mutate(type="WGBS") %>% 
+    dplyr::rename(PercM=D9) %>%
+    bind_cols(.,cov=cov$coverage8) %>% 
+    filter(cov >= 5) %>% 
+    dplyr::select(-cov) %>%
+    bind_rows(.,D9_ONT_5X) %>%
+    group_by(start) %>%
+    filter(n()>1) %>%
+    spread(type,PercM)
+  
+  result <- tibble(sd = round(sd(comp$ONT - comp$WGBS),0),
+                   n = length(comp$ONT - comp$WGBS),
+                   mean_WGBS = round(mean(comp$WGBS),0),
+                   mean_ONT = round(mean(comp$ONT),0))
+  return(result)
+}
+
+tibble_list <- list()
+
+for(i in 1:length(ROI_mc_list)){
+  tibble_list[[i]]<-calculate_difference(get(ROI_mc_list[i]),get(ROI_cov_list[i]))
+}
+
+table1_D9 <- bind_rows(tibble_list) %>% bind_cols(ROI=ROI_mc_list,.)
+
+#####
+all_cov<-as_tibble(meth.filtered) %>%
+  rowid_to_column(.)
+
+all_mc<-meth.filtered %>%
+  percMethylation(.) %>% 
+  as_tibble(.) %>%
+  bind_cols(chr=all_cov$chr,start=all_cov$start,.)
+
+all_D1 <- all_mc %>% 
+  dplyr::select(chr,start,D1) %>% 
+  mutate(type="WGBS") %>% 
+  dplyr::rename(PercM=D1) %>%
+  bind_cols(.,cov=all_cov$coverage1) %>% 
+  filter(cov >= 5) %>% 
+  dplyr::select(-cov) %>%
+  bind_rows(.,D1_ONT_5X) %>%
+  group_by(chr,start) %>%
+  filter(n()>1) %>%
+  spread(type,PercM)
+
+all_D4 <- all_mc %>% 
+  dplyr::select(chr,start,D4) %>% 
+  mutate(type="WGBS") %>% 
+  dplyr::rename(PercM=D4) %>%
+  bind_cols(.,cov=all_cov$coverage4) %>% 
+  filter(cov >= 5) %>% 
+  dplyr::select(-cov) %>%
+  bind_rows(.,D4_ONT_5X) %>%
+  group_by(chr,start) %>%
+  filter(n()>1) %>%
+  spread(type,PercM)
+
+all_D9 <- all_mc %>% 
+    dplyr::select(chr,start,D9) %>% 
+    mutate(type="WGBS") %>% 
+    dplyr::rename(PercM=D9) %>%
+    bind_cols(.,cov=all_cov$coverage8) %>% 
+    filter(cov >= 5) %>% 
+    dplyr::select(-cov) %>%
+    bind_rows(.,D9_ONT_5X) %>%
+    group_by(chr,start) %>%
+    filter(n()>1) %>%
+    spread(type,PercM)
+
+all_D15 <- all_mc %>% 
+  dplyr::select(chr,start,D15) %>% 
+  mutate(type="WGBS") %>% 
+  dplyr::rename(PercM=D15) %>%
+  bind_cols(.,cov=all_cov$coverage14) %>% 
+  filter(cov >= 5) %>% 
+  dplyr::select(-cov) %>%
+  bind_rows(.,D15_ONT_5X) %>%
+  group_by(chr,start) %>%
+  filter(n()>1) %>%
+  spread(type,PercM)
+  
+##
+HM_plot<-bind_rows(all_D1,all_D4,all_D9,all_D15)
+C<-cor(HM_plot$ONT, HM_plot$WGBS)
+sd<-round(sd(HM_plot$ONT - HM_plot$WGBS))
+title <- sprintf("Number of sites = %d Pearson correlation = %.3f SD = %d", nrow(HM_plot), C, sd)
+rf <- colorRampPalette(rev(brewer.pal(11,'Spectral')))
+r <- rf(32)
+
+ggplot(HM_plot, aes(ONT, WGBS)) +
+  geom_bin2d(bins=20) + scale_fill_gradientn(colors=r , trans="log10") +
+  ylab("Bisulfite Methylation Frequency") +
+  xlab("Nanopolish Methylation Frequency") +
+  theme_bw(base_size=15)+
+  ggtitle("WGBS and nCATS comparison",title)+
+  theme(plot.title = element_text(hjust = 0.5),
+        plot.subtitle = element_text(hjust = 0.5))

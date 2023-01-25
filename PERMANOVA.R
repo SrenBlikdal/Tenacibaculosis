@@ -1,4 +1,5 @@
 library(vegan)
+library(methylKit)
 
 load("{your_path}/MethylKit_19samples.RData")
 

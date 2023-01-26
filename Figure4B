@@ -1,0 +1,51 @@
+library(tidyverse)
+library(methylKit)
+library(GenomicRanges)
+library(ggrepel)
+
+load("{your_path}/MethylKit_19samples.RData")
+### This is the same data available in Supplementary 1 
+OTU<-read_csv("{your_path}/Sup table 1 - OTUs_table_Groups_epi_selection.csv") %>% 
+  transmute(.,EpiID=paste0("D",`EpiGenomics_Fish ID`),alivibrio=`OTU1 (Alivibrio)`, Mycoplasma= (`OTU2 (Mycoplasmataceae)`)/10000, Other=Other)
+  select()
+
+
+sample.id <- c("D1","D2","D3","D4","D5","D6","D8","D9","D10", "D11","D12","D13","D14","D15","D16","D17","D18","D19","D20")
+treatment_n <- c(1,1,1,0,1,0,1,1,0,1,0,1,0,0,1,0,0,1,0)
+treatment <- gsub(1,"Sick",treatment_n) %>% gsub("0","Healthy",.)
+design.matrix <- bind_cols(ID=sample.id, treatment=treatment) %>% left_join(.,OTU, by= c("ID"="EpiID"))
+
+#epor
+DMR_12<-selectByOverlap(meth.filtered,mydmr[12])
+
+#prkcda
+DMR_49<-selectByOverlap(meth.filtered,mydmr[49])
+
+#trh
+DMR_53<-selectByOverlap(meth.filtered,mydmr[53])
+
+#slc48a1a
+DMR_56<-selectByOverlap(meth.filtered,mydmr[56])
+
+#LOC106590732 (ramp1) 
+DMR_85<-selectByOverlap(meth.filtered,mydmr[85])
+
+DMR<-DMR_85
+p<-(colMeans(percMethylation(DMR))) %>% tibble(design.matrix,mean.meth=.)
+title <- sprintf(" \n N= %d",nrow(DMR))
+  
+ggplot(p,aes(x=factor(treatment, level= c("Sick","Healthy")), y=mean.meth))+
+  geom_boxplot(outlier.shape = NA, lwd=1.2)+
+  geom_jitter(shape = 21,width = 0.10, height= 0, size=7, aes(fill=Mycoplasma), color = "black")+
+  scale_fill_gradient(low="white", high="lightblue")+
+  coord_flip()+
+  ylab("")+
+  xlab("")+
+  ylim(c(0,100))+
+  ggtitle(title)+
+  theme_classic()+
+  theme(plot.title = element_text(hjust = 0.5, size = 20),
+        axis.text.x = element_text(size = 20),
+        axis.text.y = element_text(size = 20),
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor.x = element_blank())
